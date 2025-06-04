@@ -1,0 +1,371 @@
+io.stdout:setvbuf("no")
+
+if arg[2] == "debug" then
+    require("lldebugger").start()
+end
+
+local AlexMode = false
+
+local GameStates = {
+    "InMenu",
+    "Playing",
+    "CustomLevel"
+}
+
+function random_reset()
+    math.randomseed (os.time())
+    local rnd = math.random(10)
+    for i = 1,rnd do
+        math.random()
+    end
+end
+
+function GetFileNames(dir)
+    local tab = love.filesystem.getDirectoryItems(dir)
+    return tab
+end
+
+function RandomSong()
+    random_reset()
+    local bruh = GetFileNames("assets/goofMusic/")
+    local rng = math.random(#bruh)
+    if rng == lastsong then
+        repeat
+            rng = math.random(#bruh)
+        until rng ~= lastsong
+    end
+    lastsong = rng
+    local file = bruh[rng]
+    return love.audio.newSource("assets/goofMusic/"..file, "stream")
+end
+
+levelToLoad = nil
+currentLevel = nil
+LASTLEVEL = 0
+lastsong = 0
+objects = {}
+walls = {}
+enemies = {}
+lobotomies = {}
+player = nil
+levels = nil
+level = nil
+WONTHEGAME = false
+LOSTTHEGAME = false
+winSong = love.audio.newSource("assets/doodoo.mp3", "stream")
+winSong:isLooping()
+song = nil
+
+local function loadLevel(dir)
+    random_reset()
+    song = nil
+    objects = {}
+    walls = {}
+    enemies = {}
+    player = nil
+    levels = nil
+    level = nil
+    local map = require(dir)
+    for i,v in ipairs(map) do
+        local tab = {}
+        local entab = {}
+        for i2, v2 in ipairs(v) do
+            for j,w in ipairs(v2) do
+                if w == 1 then
+                    -- Add all the walls to the walls table instead.
+                    ---- CHANGE THIS
+                    local wa = Wall((j-1)*50, (i2-1)*50)
+                    table.insert(tab, wa)
+                    -------------
+                elseif w == 2 then
+                    local wa = Wall((j-1)*50, (i2-1)*50)
+                    wa.canTouch = false
+                    wa.isFakeWall = true
+                    table.insert(tab, wa)
+                elseif w == 3 then
+                    local en = Enemy((j-1)*50, (i2-1)*50, "up")
+                    table.insert(entab, en)
+                elseif w == 4 then
+                    local en = Enemy((j-1)*50, (i2-1)*50, "left")
+                    table.insert(entab, en)
+                elseif w == -1 then
+                    player = Player((j-1)*50, (i2-1)*50)
+                    level = i
+                    table.insert(objects, player)
+                elseif w == -2 then
+                    local wa = Wall((j-1)*50, (i2-1)*50, 1)
+                    table.insert(tab, wa)
+                end
+            end
+        end
+        table.insert(walls, tab)
+        table.insert(enemies, entab)
+    end
+
+    if player == nil then
+        error("MAKE SURE TO PLACE A PLAYER!")
+    end
+    local hasWinWall = false
+    for i,v in ipairs(walls) do
+        for i2, wall in ipairs(v) do
+            if wall.winWall == true then
+                hasWinWall = true
+            end
+        end
+    end
+    if hasWinWall == false then
+        error("MAKE SURE TO PLACE A WIN POINT!")
+    end
+    random_reset()
+    song = RandomSong()
+    song:isLooping()
+    return map
+end
+
+function love.load()
+    Object = require "classic"
+    require "entity"
+    require "player"
+    require "enemy"
+    require "wall"
+    require "mainmenu"
+    require "winthegame"
+    require "losethegame"
+    require "lobotomy"
+    currentState = GameStates[1]
+    --Create the walls table
+    ---- ADD THIS
+    
+    -------------
+
+    mainmenu = MainMenu()
+    winscreen = WinScreen()
+    losescreen = LoseScreen()
+end
+
+function love.update(dt)
+
+    for i,v in pairs(lobotomies) do
+        if v then
+            v:update(dt)
+        end
+    end
+
+    if WONTHEGAME then
+        song:stop()
+        winSong:play()
+        winscreen:update(dt)
+        return
+    end
+    if LOSTTHEGAME then
+        song:stop()
+        losescreen:update(dt)
+        return
+    end
+    if currentState == GameStates[1] then
+        mainmenu:update(dt)
+        return
+    end
+
+    if currentLevel ~= levelToLoad then
+        currentLevel = levelToLoad
+        if currentState ~= GameStates[3] then
+            levels = loadLevel(currentLevel)
+        else
+            levels = loadLevel("CustomLevels/"..currentLevel)
+        end
+        LASTLEVEL = #levels
+    end
+    if song then
+        song:play()
+    end
+    if player.x >= 800 then
+        love.graphics.clear()
+        level = level + 1
+        player.x = 0
+        love.draw()
+    elseif player.x <= 0 then
+        love.graphics.clear()
+        level = level - 1
+        player.x = 800
+        love.draw()
+    elseif player.y <= 0 then
+        love.graphics:clear()
+        level = level + 1
+        player.y = 600
+        love.draw()
+    elseif player.y >= 600 then
+        love.graphics:clear()
+        level = level - 1
+        player.y = 0
+        love.draw()
+    end
+    for i,v in ipairs(objects) do
+        v:update(dt)
+    end
+
+    -- Update the walls
+    ---- ADD THIS
+    for i,v in ipairs(walls) do
+        for i2, wall in ipairs(v) do
+            wall:update(dt)
+        end
+    end
+
+    for i,v in ipairs(enemies) do
+        for i2, enmy in ipairs(v) do
+            enmy:update(dt)
+        end
+    end
+    -------------
+
+    local loop = true
+    local limit = 0
+
+    while loop do
+        loop = false
+
+        limit = limit + 1
+        if limit > 100 then
+            break
+        end
+
+        for i=1,#objects-1 do
+            for j=i+1,#objects do
+                local collision = objects[i]:resolveCollision(objects[j])
+                if collision then
+                    loop = true
+                end
+            end
+        end
+
+        -- For each object check collision with every wall.
+        ---- ADD THIS
+        for i,v in ipairs(walls) do
+            for i2, wall in ipairs(v) do
+                if wall.canTouch == true then
+                    for j,object in ipairs(objects) do
+                        local collision = object:resolveCollision(wall)
+                        if collision then
+                            if wall.winWall then
+                                WONTHEGAME = true
+                            end
+                            loop = true
+                        end
+                    end
+                    for j,enmie in ipairs(enemies) do 
+                        for j2, enmy in ipairs(enmie) do
+                            local collision = enmy:resolveCollision(wall)
+                            if collision then
+                                enmy.move = -enmy.move
+                                loop = true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        for i, v in ipairs(enemies) do
+            for i2, enmy in ipairs(v) do
+                if enmy.canMove == true then
+                    for j,object in ipairs(objects) do
+                        local collision = object:resolveCollision(enmy)
+                        if collision and not AlexMode then
+                            LOSTTHEGAME = true
+                            loop = true
+                        end
+                    end
+                end
+            end
+        end
+        -------------
+    end
+end
+
+function love.draw()
+    if WONTHEGAME then
+        winscreen:draw()
+    end
+    if LOSTTHEGAME then
+        losescreen:draw()
+    end
+    if currentState == GameStates[1] then
+        mainmenu:draw()
+    end
+    if not WONTHEGAME and not LOSTTHEGAME and currentState ~= GameStates[1] then
+        for i,v in ipairs(objects) do
+            v:draw()
+        end
+
+        for i, v in ipairs(enemies) do
+            for i2, enmy in ipairs(v) do
+                if i == level then
+                    enmy.canMove = true
+                    enmy:draw()
+                else
+                    enmy.canMove = false
+                end
+            end
+        end
+
+        for i,v in ipairs(walls) do
+            for i2, wall in ipairs(v) do
+                if i == level then
+                    if not wall.isFakeWall then
+                        wall.canTouch = true
+                    end
+                    wall:draw()
+                else
+                    wall.canTouch = false
+                end
+            end
+        end
+    end
+    if losescreen.InstantLobotomy then
+        losescreen.InstantLobotomy = false
+        table.insert(lobotomies, Lobotomy())
+    end
+    for i,v in pairs(lobotomies) do
+        if v then
+            v:draw()
+        end
+    end
+end
+
+--! file: main.lua
+function love.keypressed(key)
+    -- Let the player jump when the up-key is pressed
+
+    if WONTHEGAME then
+        winscreen:keypressed(key)
+        return
+    end
+
+    if LOSTTHEGAME then
+        local dingleberry = losescreen:keypressed(key)
+        if dingleberry == "Sigma" then
+            LOSTTHEGAME = false
+            currentState = GameStates[1]
+            random_reset()
+        end
+        return
+    end
+
+    if currentState == GameStates[2] then
+        return
+    end
+
+    local thing, thing2 = mainmenu:keypressed(key)
+    if thing then
+        if thing == GameStates[2] then
+            currentState = GameStates[2]
+            currentLevel = nil
+            levelToLoad = "levels"
+        elseif thing == "Custom" then
+            currentState = GameStates[3]
+            currentLevel = nil
+            levelToLoad = thing2
+        end
+    end
+end
