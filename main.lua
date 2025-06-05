@@ -359,6 +359,7 @@ function love.keypressed(key)
             WONTHEGAME = false
             LOSTTHEGAME = false
             currentState = GameStates[1]
+            winSong:stop()
             random_reset()
         end
         return
