@@ -66,9 +66,6 @@ function LoseScreen:draw()
             return
         end
         self.Sound:play()
-        if isVideo then
-            self.Sound:isLooping()
-        end
     end
     if not isVideo then
         love.graphics.setFont(font)
