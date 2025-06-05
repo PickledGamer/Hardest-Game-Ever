@@ -55,6 +55,9 @@ LOSTTHEGAME = false
 winSong = love.audio.newSource("assets/doodoo.mp3", "stream")
 winSong:isLooping()
 song = nil
+noPlr = false
+noWinWall = false
+bgd = love.graphics.newImage("assets/Background.png")
 
 local function loadLevel(dir)
     random_reset()
@@ -103,7 +106,8 @@ local function loadLevel(dir)
     end
 
     if player == nil then
-        error("MAKE SURE TO PLACE A PLAYER!")
+        mainmenu:AddErrorText(levelToLoad.." Has No Player!", 2)
+        noPlr = true
     end
     local hasWinWall = false
     for i,v in ipairs(walls) do
@@ -114,11 +118,18 @@ local function loadLevel(dir)
         end
     end
     if hasWinWall == false then
-        error("MAKE SURE TO PLACE A WIN POINT!")
+        mainmenu:AddErrorText(levelToLoad.." Has No WinWall!", 2)
+        noWinWall = true
     end
     random_reset()
     song = RandomSong()
     song:isLooping()
+    if noPlr or noWinWall then
+        mainmenu.InCustomLevels = false
+        currentState = GameStates[1]
+        levelToLoad = nil
+        currentLevel = nil
+    end
     return map
 end
 
@@ -162,7 +173,10 @@ function love.update(dt)
         losescreen:update(dt)
         return
     end
-    if currentState == GameStates[1] then
+    if currentState == GameStates[1] or noPlr or noWinWall then
+        if song then
+            song:stop()
+        end
         mainmenu:update(dt)
         return
     end
@@ -179,25 +193,25 @@ function love.update(dt)
     if song then
         song:play()
     end
-    if player.x >= 800 then
+    if player.x >= 800-16 then
         love.graphics.clear()
         level = level + 1
-        player.x = 0
+        player.x = -15
         love.draw()
-    elseif player.x <= 0 then
+    elseif player.x <= -16 then
         love.graphics.clear()
         level = level - 1
-        player.x = 800
+        player.x = 800-17
         love.draw()
-    elseif player.y <= 0 then
+    elseif player.y <= -16 then
         love.graphics:clear()
         level = level + 1
-        player.y = 600
+        player.y = 600-17
         love.draw()
-    elseif player.y >= 600 then
+    elseif player.y >= 600-16 then
         love.graphics:clear()
         level = level - 1
-        player.y = 0
+        player.y = -15
         love.draw()
     end
     for i,v in ipairs(objects) do
@@ -293,7 +307,9 @@ function love.draw()
     if currentState == GameStates[1] then
         mainmenu:draw()
     end
-    if not WONTHEGAME and not LOSTTHEGAME and currentState ~= GameStates[1] then
+    if not WONTHEGAME and not LOSTTHEGAME and currentState ~= GameStates[1] and not noPlr and not noWinWall then
+        love.graphics.draw(bgd, 0, 0)
+
         for i,v in ipairs(objects) do
             v:draw()
         end
@@ -362,10 +378,14 @@ function love.keypressed(key)
             currentState = GameStates[2]
             currentLevel = nil
             levelToLoad = "levels"
+            noPlr = false
+            noWinWall = false
         elseif thing == "Custom" then
             currentState = GameStates[3]
             currentLevel = nil
             levelToLoad = thing2
+            noPlr = false
+            noWinWall = false
         end
     end
 end

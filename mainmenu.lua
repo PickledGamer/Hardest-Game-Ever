@@ -5,13 +5,26 @@ local indexNum = 1
 function MainMenu:new()
     menu = love.graphics.newImage("assets/MenuBox.png")
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
+    font2 = love.graphics.newFont("assets/Mojangles.ttf", 20)
     self.textChangeTimer = 0
     self.InCustomLevels = false
+    self.DT = 0
+    self.Warning = {
+        "This Game Contains Flashing Images and Loud Sounds",
+        "If You Have Epilepsy or Get Scared Easily",
+        "Have Someone With You While You Play"
+    }
     self.MenuText = {
         "Play",
         "CustomLevels",
         "Quit :("
     }
+    self.CoolStuff = {
+        "add your own music by replacing files",
+        "or add files to the goofMusic folder",
+        "SFX is the same way"
+    }
+    self.Errors = {}
     self.CustomText = {}
     self.song = love.audio.newSource("assets/Cool Intro.mp3", "static")
     self.song:isLooping()
@@ -28,6 +41,7 @@ function GETCUSTOMLEVELS(dir)
 end
 
 function MainMenu:update(dt)
+    self.DT = dt
     if self.MenuText[2] ~= "CustomLevels" and self.textChangeTimer <= 0 then
         self.MenuText[2] = "CustomLevels"
     else
@@ -37,6 +51,13 @@ end
 
 function MainMenu:draw()
     self.song:play()
+    love.graphics.setFont(font2)
+    local warnOffset = 0
+    for i, v in pairs(self.Warning) do
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.print(v, 31, 62 + warnOffset)
+        warnOffset = warnOffset + 32
+    end
     love.graphics.setFont(font)
     if self.InCustomLevels then
         self.CustomText = GETCUSTOMLEVELS("CustomLevels")
@@ -62,6 +83,33 @@ function MainMenu:draw()
             love.graphics.setColor(1,1,1,1)
         end
     end
+    love.graphics.setColor(1,0,0,1)
+    local offset = 0
+    for i,v in pairs(self.Errors) do
+        if v[1] and v[2] then
+            local length = string.len(v[1])
+            love.graphics.print(v[1], love.graphics.getWidth()/1.5 - (1.35*length), 10 + offset)
+            if v[2] > 0 then
+                v[2] = v[2] - self.DT
+            else
+                table.remove(self.Errors, i)
+            end
+        end
+        offset = offset + 20
+    end
+    local offset = 0
+    for i,v in pairs(self.CoolStuff) do
+        if v then
+            local length = string.len(v)
+            love.graphics.print(v, 31 , love.graphics.getHeight()/1.25 + offset)
+        end
+        offset = offset + 20
+    end
+    love.graphics.setColor(1,1,1,1)
+end
+
+function MainMenu:AddErrorText(errorMsg, lifeTime)
+    table.insert(self.Errors, {errorMsg, lifeTime})
 end
 
 function MainMenu:keypressed(key)

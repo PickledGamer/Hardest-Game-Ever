@@ -27,7 +27,7 @@ function LoseScreen:new()
     self.InCustomLevels = false
     self.played = false
     self.deathCount = 0
-    self.DeathsNeededForLobotomy = math.random(10)
+    self.DeathsNeededForLobotomy = math.random(5)
     self.InstantLobotomy = false
     self.MenuText = {
         "You",
