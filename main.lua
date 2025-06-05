@@ -86,10 +86,10 @@ local function loadLevel(dir)
                     wa.isFakeWall = true
                     table.insert(tab, wa)
                 elseif w == 3 then
-                    local en = Enemy((j-1)*50, (i2-1)*50, "up")
+                    local en = Enemy(((j-1)*50)+8, ((i2-1)*50)+8, "up")
                     table.insert(entab, en)
                 elseif w == 4 then
-                    local en = Enemy((j-1)*50, (i2-1)*50, "left")
+                    local en = Enemy(((j-1)*50)+8, ((i2-1)*50)+8, "left")
                     table.insert(entab, en)
                 elseif w == -1 then
                     player = Player((j-1)*50, (i2-1)*50)
@@ -354,7 +354,13 @@ function love.keypressed(key)
     -- Let the player jump when the up-key is pressed
 
     if WONTHEGAME then
-        winscreen:keypressed(key)
+        local yuck = winscreen:keypressed(key)
+        if yuck == "Ligma" then
+            WONTHEGAME = false
+            LOSTTHEGAME = false
+            currentState = GameStates[1]
+            random_reset()
+        end
         return
     end
 

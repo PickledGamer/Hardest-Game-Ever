@@ -5,7 +5,7 @@ local indexNum = 1
 function MainMenu:new()
     menu = love.graphics.newImage("assets/MenuBox.png")
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
-    font2 = love.graphics.newFont("assets/Mojangles.ttf", 20)
+    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35)
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.DT = 0
@@ -24,6 +24,7 @@ function MainMenu:new()
         "or add files to the goofMusic folder",
         "SFX is the same way"
     }
+    self.Title = "BrainRot"
     self.Errors = {}
     self.CustomText = {}
     self.song = love.audio.newSource("assets/Cool Intro.mp3", "static")
@@ -51,7 +52,7 @@ end
 
 function MainMenu:draw()
     self.song:play()
-    love.graphics.setFont(font2)
+    love.graphics.setFont(font)
     local warnOffset = 0
     for i, v in pairs(self.Warning) do
         love.graphics.setColor(1,1,1,1)
@@ -83,6 +84,9 @@ function MainMenu:draw()
             love.graphics.setColor(1,1,1,1)
         end
     end
+    love.graphics.setFont(font2)
+    love.graphics.print(self.Title, love.graphics.getWidth()/2 - 75, love.graphics.getHeight()/2 - 96)
+    love.graphics.setFont(font)
     love.graphics.setColor(1,0,0,1)
     local offset = 0
     for i,v in pairs(self.Errors) do
@@ -100,7 +104,6 @@ function MainMenu:draw()
     local offset = 0
     for i,v in pairs(self.CoolStuff) do
         if v then
-            local length = string.len(v)
             love.graphics.print(v, 31 , love.graphics.getHeight()/1.25 + offset)
         end
         offset = offset + 20
@@ -113,6 +116,13 @@ function MainMenu:AddErrorText(errorMsg, lifeTime)
 end
 
 function MainMenu:keypressed(key)
+    if key == "escape" then
+        if self.InCustomLevels then
+            self.InCustomLevels = false
+        else
+            love.event.quit()
+        end
+    end
     if key == "up" then
         indexNum = indexNum - 1
     end

@@ -6,6 +6,7 @@
     3 is an enemy that moves up and down
     4 is an enemy that moves left and right
     -1 is the position the player will spawn
+    -2 is the winWall, thats how the player wins
     -------------------------------------------
     there is no limit to how many levels you can have you can make them go up, down or right
     just make sure the holes in the walls match up on each level or bad things could happen
@@ -57,7 +58,7 @@ Levels = {
         {1,0,0,0,0,0,0,0,0,4,0,0,0,0,0,1},
         {1,0,0,0,0,0,0,0,0,0,0,0,0,3,0,1},
         {1,0,0,0,0,0,0,0,0,0,0,4,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,1},
+        {1,0,0,0,0,0,0,0,0,0,0,0,4,0,-2,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     },
 }

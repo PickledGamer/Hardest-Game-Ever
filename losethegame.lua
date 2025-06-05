@@ -1,31 +1,15 @@
 LoseScreen = Object:extend()
 
 local isVideo = false
-
-function GetFileNames(dir)
-    local tab = love.filesystem.getDirectoryItems(dir)
-    return tab
-end
-
-function RandomSFX()
-    local bruh = GetFileNames("assets/goofSFX/")
-    local rng = math.random(1, #bruh)
-    local rng2 = math.random(1, #bruh*2)
-    if rng2 == rng then
-        isVideo = true
-        return love.graphics.newVideo("assets/hope im not to late.ogv")
-    else
-        isVideo = false
-        local file = bruh[rng]
-        return love.audio.newSource("assets/goofSFX/"..file, "stream")
-    end
-end
+local me = nil
 
 function LoseScreen:new()
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
+    me = self
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.played = false
+    self.justStarted = true
     self.deathCount = 0
     self.DeathsNeededForLobotomy = math.random(5)
     self.InstantLobotomy = false
@@ -48,24 +32,47 @@ function LoseScreen:new()
     self.Sound = RandomSFX()
 end
 
-function LoseScreen:update(dt)
-    if self.deathCount >= self.DeathsNeededForLobotomy then
-        self.InstantLobotomy = true
-        self.deathCount = 0
-        self.DeathsNeededForLobotomy = math.random(10)
+function GetFileNames(dir)
+    local tab = love.filesystem.getDirectoryItems(dir)
+    return tab
+end
+
+function RandomSFX()
+    local bruh = GetFileNames("assets/goofSFX/")
+    local rng = math.random(1, #bruh)
+    local rng2 = math.random(1, #bruh*2)
+    if rng2 == rng and not (me.deathCount >= me.DeathsNeededForLobotomy) then
+        isVideo = true
+        return love.graphics.newVideo("assets/hope im not to late.ogv")
+    else
+        isVideo = false
+        local file = bruh[rng]
+        return love.audio.newSource("assets/goofSFX/"..file, "stream")
     end
 end
 
+function LoseScreen:update(dt)
+end
+
 function LoseScreen:draw()
+    if self.justStarted then
+        self.justStarted = false
+        repeat
+            self.DeathsNeededForLobotomy = math.random(5)
+        until self.DeathsNeededForLobotomy > 1
+    end
     love.graphics.setColor(1,1,1,1)
     if not self.played then
+        self.deathCount = self.deathCount + 1
         self.Sound = RandomSFX()
-        self.deathCount = self.deathCount +1
         self.played = true
-        if self.InstantLobotomy then
-            return
+        if self.deathCount >= self.DeathsNeededForLobotomy then
+            self.InstantLobotomy = true
+            self.deathCount = 0
+            self.DeathsNeededForLobotomy = math.random(5)
+        else
+            self.Sound:play()
         end
-        self.Sound:play()
     end
     if not isVideo then
         love.graphics.setFont(font)
