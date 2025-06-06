@@ -39,10 +39,25 @@ function RandomSong()
     return love.audio.newSource("assets/goofMusic/"..file, "stream")
 end
 
+function RandomWinSong()
+    random_reset()
+    local bruh = GetFileNames("assets/goofWinMusic/")
+    local rng = math.random(#bruh)
+    if rng == lastwinsong then
+        repeat
+            rng = math.random(#bruh)
+        until rng ~= lastwinsong
+    end
+    lastwinsong = rng
+    local file = bruh[rng]
+    return love.audio.newSource("assets/goofWinMusic/"..file, "stream")
+end
+
 levelToLoad = nil
 currentLevel = nil
 LASTLEVEL = 0
 lastsong = 0
+lastwinsong = 0
 objects = {}
 walls = {}
 enemies = {}
@@ -52,8 +67,7 @@ levels = nil
 level = nil
 WONTHEGAME = false
 LOSTTHEGAME = false
-winSong = love.audio.newSource("assets/doodoo.mp3", "stream")
-winSong:isLooping()
+winSong = nil
 song = nil
 noPlr = false
 noWinWall = false
@@ -61,6 +75,7 @@ bgd = love.graphics.newImage("assets/Background.png")
 
 local function loadLevel(dir)
     random_reset()
+    winSong = nil
     song = nil
     objects = {}
     walls = {}
@@ -122,6 +137,8 @@ local function loadLevel(dir)
         noWinWall = true
     end
     random_reset()
+    winSong = RandomWinSong()
+    winSong:isLooping()
     song = RandomSong()
     song:isLooping()
     if noPlr or noWinWall then

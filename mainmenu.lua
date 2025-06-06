@@ -19,10 +19,17 @@ function MainMenu:new()
         "CustomLevels",
         "Quit :("
     }
+    local str = love.filesystem.getSourceBaseDirectory()
+    local str2 = str
+    str2 = string.sub(str2, 1, 2)
+    str = string.sub(str, 3, string.len(str)-2)
+    str2 = string.upper(str2)
+    str = str2 .. str
     self.CoolStuff = {
         "add your own music by replacing files",
         "or add files to the goofMusic folder",
-        "SFX is the same way"
+        "goofSFX & goofWinMusic is the same way",
+        "folders are here: "..str.."/assets/"
     }
     self.Title = "BrainRot"
     self.Errors = {}
