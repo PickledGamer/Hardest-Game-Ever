@@ -22,7 +22,7 @@ function MainMenu:new()
     local str = love.filesystem.getSourceBaseDirectory()
     local str2 = str
     str2 = string.sub(str2, 1, 2)
-    str = string.sub(str, 3, string.len(str)-2)
+    str = string.sub(str, 3, string.len(str))
     str2 = string.upper(str2)
     str = str2 .. str
     self.CoolStuff = {
