@@ -5,8 +5,8 @@ local indexNum = 1
 
 function MainMenu:new()
     menu = love.graphics.newImage("assets/MenuBox.png")
-    font = love.graphics.newFont("assets/Mojangles.ttf", 20)
-    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35)
+    font = love.graphics.newFont("assets/Mojangles.ttf", 20*ScaleY)
+    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleY)
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.DT = 0
@@ -70,30 +70,30 @@ function MainMenu:draw()
     love.graphics.setFont(font)
     if self.InCustomLevels then
         self.CustomText = GETCUSTOMLEVELS("CustomLevels")
-        love.graphics.draw(menu, love.graphics.getWidth()/2 - 128, love.graphics.getHeight()/2 - 128,0,1,(1+#self.CustomText/10))
+        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,(ScaleY+#self.CustomText/10))
         local offset = 0
         for i, v in pairs(self.CustomText) do
             if indexNum == i then
                 love.graphics.setColor(0.7,0.6,0.2,1)
             end
-            love.graphics.print(v, love.graphics.getWidth()/2 - 64, (love.graphics.getHeight()/2 - 32) + offset)
+            love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
             offset = offset + 20
             love.graphics.setColor(1,1,1,1)
         end
     else
-        love.graphics.draw(menu, love.graphics.getWidth()/2 - 128, love.graphics.getHeight()/2 - 128)
+        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY)
         local offset = 0
         for i, v in pairs(self.MenuText) do
             if indexNum == i then
                 love.graphics.setColor(0.7,0.6,0.2,1)
             end
-            love.graphics.print(v, love.graphics.getWidth()/2 - 64, (love.graphics.getHeight()/2 - 32) + offset)
+            love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
             offset = offset + 20
             love.graphics.setColor(1,1,1,1)
         end
     end
     love.graphics.setFont(font2)
-    love.graphics.print(self.Title, love.graphics.getWidth()/2 - 75, love.graphics.getHeight()/2 - 96)
+    love.graphics.print(self.Title, love.graphics.getWidth()/2 - font2:getWidth(self.Title)/2, love.graphics.getHeight()/2 - font2:getHeight()*2)
     love.graphics.setFont(font)
     love.graphics.setColor(1,0,0,1)
     local offset = 0

@@ -36,7 +36,7 @@ function Lobotomy:draw()
     -- love.graphics.draw(self.Image,love.graphics.getWidth()/2 - self.Image:getWidth()/2, love.graphics.getHeight()/2 - self.Image:getHeight()/2)
     love.graphics.draw(self.Image,0,0,0,love.graphics.getWidth()/self.Image:getWidth(),love.graphics.getHeight()/self.Image:getHeight())
     love.graphics.setColor(1,1,1,self.WhiteFade)
-    love.graphics.draw(self.White,0, 0)
+    love.graphics.draw(self.White,0,0,0,love.graphics.getWidth()/self.White:getWidth(),love.graphics.getHeight()/self.White:getHeight())
     if not self.Played then
         self.Played = true
         self.Sound:play()

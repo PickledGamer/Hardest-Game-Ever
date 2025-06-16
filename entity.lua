@@ -5,8 +5,8 @@ function Entity:new(x, y, image_path)
     self.x = x
     self.y = y
     self.image = love.graphics.newImage(image_path)
-    self.width = self.image:getWidth()
-    self.height = self.image:getHeight()
+    self.width = self.image:getWidth()*ScaleX
+    self.height = self.image:getHeight()*ScaleY
 
     self.last = {}
     self.last.x = self.x
@@ -36,7 +36,7 @@ function Entity:update(dt)
 end
 
 function Entity:draw()
-    love.graphics.draw(self.image, self.x, self.y)
+    love.graphics.draw(self.image, self.x, self.y, 0, ScaleX, ScaleY)
 end
 
 function Entity:checkCollision(e)

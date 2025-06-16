@@ -1,6 +1,9 @@
 LoseScreen = Object:extend()
 
 local isVideo = false
+local lastSound
+local lastVid
+local wasVid = false
 
 function LoseScreen:new()
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
@@ -41,8 +44,12 @@ function LoseScreen:RandomSFX()
     random_reset()
     local bruh = GetFileNames("assets/goofSFX/")
     local rng = math.random(1, #bruh)
-    local rng2 = math.random(1, #bruh*1.25)
-    if rng2 == rng and not (self.deathCount >= self.DeathsNeededForLobotomy) then
+    local rng2 = math.random(1, #bruh/2)
+    if rng2 == rng then
+        wasVid = true
+    end
+    if wasVid or rng2 == rng and not (self.deathCount >= self.DeathsNeededForLobotomy) then
+        wasVid = false
         isVideo = true
         bruh = GetFileNames("assets/goofVids/")
         local tab = {}
@@ -55,10 +62,24 @@ function LoseScreen:RandomSFX()
         self.SoundErrors = tab
         rng = math.random(1, #bruh)
         local file = bruh[rng]
+        if file == lastVid then
+            repeat
+                rng = math.random(1, #bruh)
+                file = bruh[rng]
+            until file ~= lastVid
+        end
+        lastVid = file
         return "assets/goofVids/"..file
     else
         isVideo = false
         local file = bruh[rng]
+        if file == lastSound then
+            repeat
+                rng = math.random(1, #bruh)
+                file = bruh[rng]
+            until file ~= lastSound
+        end
+        lastSound = file
         return "assets/goofSFX/"..file
     end
 end
@@ -117,6 +138,15 @@ function LoseScreen:draw()
     else
         --love.graphics.draw(self.Sound, love.graphics.getWidth()/2 - self.Sound:getWidth()/2, love.graphics.getHeight()/2 - self.Sound:getHeight()/2)
         love.graphics.draw(self.Video, 0, 0, 0, love.graphics.getWidth()/self.Video:getWidth(), love.graphics.getHeight()/self.Video:getHeight())
+    end
+end
+
+function LoseScreen:StopSounds()
+    if self.Sound then
+        self.Sound:stop()
+    end
+    if self.Video then
+        self.Video:release()
     end
 end
 

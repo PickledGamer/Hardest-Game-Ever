@@ -1,3 +1,8 @@
+love.window.setTitle("BrainRot")
+love.window.setFullscreen(false, "desktop")
+ScaleX = (love.graphics.getWidth()/800)
+ScaleY = (love.graphics.getHeight()/600)
+
 io.stdout:setvbuf("no")
 
 if arg[2] == "debug" then
@@ -35,6 +40,11 @@ local currentState
 local mainmenu
 local winscreen
 local losescreen
+
+local xPosScale = 50*ScaleX
+local yPosScale = 50*ScaleY
+local entXOffset = 9*ScaleX
+local entYOffset = 9*ScaleY
 
 function love.load()
     Object = require "classic"
@@ -74,7 +84,7 @@ function RandomSong()
     random_reset()
     local bruh = GetFileNames("assets/goofMusic/")
     local rng = math.random(#bruh)
-    if rng == lastsong then
+    if rng == lastsong and #bruh > 1 then
         repeat
             rng = math.random(#bruh)
         until rng ~= lastsong
@@ -88,7 +98,7 @@ function RandomWinSong()
     random_reset()
     local bruh = GetFileNames("assets/goofWinMusic/")
     local rng = math.random(#bruh)
-    if rng == lastwinsong then
+    if rng == lastwinsong and #bruh > 1 then
         repeat
             rng = math.random(#bruh)
         until rng ~= lastwinsong
@@ -109,52 +119,52 @@ local function CheckObjectType(m)
                         if w2 == 1 then
                             -- Add all the walls to the walls table instead.
                             ---- CHANGE THIS
-                            local wa = Wall((j-1)*50, (i2-1)*50)
+                            local wa = Wall((j-1)*xPosScale, (i2-1)*yPosScale)
                             table.insert(tab, wa)
                             -------------
                         elseif w2 == 2 then
-                            local wa = Wall((j-1)*50, (i2-1)*50)
+                            local wa = Wall((j-1)*xPosScale, (i2-1)*yPosScale)
                             wa.canTouch = false
                             wa.isFakeWall = true
                             table.insert(tab, wa)
                         elseif w2 == 3 then
-                            local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "up")
+                            local en = Enemy(((j-1)*xPosScale)+entXOffset, ((i2-1)*yPosScale)+entYOffset, "up")
                             table.insert(entab, en)
                         elseif w2 == 4 then
-                            local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "left")
+                            local en = Enemy(((j-1)*xPosScale)+entXOffset, ((i2-1)*yPosScale)+entYOffset, "left")
                             table.insert(entab, en)
                         elseif w2 == -1 then
-                            player = Player(((j-1)*50)+9, ((i2-1)*50)+9)
+                            player = Player(((j-1)*xPosScale)+entXOffset, ((i2-1)*yPosScale)+entYOffset)
                             level = i
                             table.insert(objects, player)
                         elseif w2 == -2 then
-                            local wa = Wall((j-1)*50, (i2-1)*50, 1)
+                            local wa = Wall((j-1)*xPosScale, (i2-1)*yPosScale, 1)
                             table.insert(tab, wa)
                         end
                     end
                 elseif w == 1 then
                     -- Add all the walls to the walls table instead.
                     ---- CHANGE THIS
-                    local wa = Wall((j-1)*50, (i2-1)*50)
+                    local wa = Wall((j-1)*xPosScale, (i2-1)*yPosScale)
                     table.insert(tab, wa)
                     -------------
                 elseif w == 2 then
-                    local wa = Wall((j-1)*50, (i2-1)*50)
+                    local wa = Wall((j-1)*xPosScale, (i2-1)*yPosScale)
                     wa.canTouch = false
                     wa.isFakeWall = true
                     table.insert(tab, wa)
                 elseif w == 3 then
-                    local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "up")
+                    local en = Enemy(((j-1)*xPosScale)+entXOffset, ((i2-1)*yPosScale)+entYOffset, "up")
                     table.insert(entab, en)
                 elseif w == 4 then
-                    local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "left")
+                    local en = Enemy(((j-1)*xPosScale)+entXOffset, ((i2-1)*yPosScale)+entYOffset, "left")
                     table.insert(entab, en)
                 elseif w == -1 then
-                    player = Player(((j-1)*50)+9, ((i2-1)*50)+9)
+                    player = Player(((j-1)*xPosScale)+entXOffset, ((i2-1)*yPosScale)+entYOffset)
                     level = i
                     table.insert(objects, player)
                 elseif w == -2 then
-                    local wa = Wall((j-1)*50, (i2-1)*50, 1)
+                    local wa = Wall((j-1)*xPosScale, (i2-1)*yPosScale, 1)
                     table.insert(tab, wa)
                 end
             end
@@ -260,7 +270,7 @@ function love.update(dt)
     if not player then
         return
     end
-    if player.x >= 800-16 then
+    if player.x >= love.graphics:getWidth()-16 then
         love.graphics.clear()
         level = level + 1
         player.x = -15
@@ -268,14 +278,14 @@ function love.update(dt)
     elseif player.x <= -16 then
         love.graphics.clear()
         level = level - 1
-        player.x = 800-17
+        player.x = love.graphics:getWidth()-17
         love.draw()
     elseif player.y <= -16 then
         love.graphics:clear()
         level = level + 1
-        player.y = 600-17
+        player.y = love.graphics:getHeight()-17
         love.draw()
-    elseif player.y >= 600-16 then
+    elseif player.y >= love.graphics:getHeight()-16 then
         love.graphics:clear()
         level = level - 1
         player.y = -15
@@ -338,7 +348,8 @@ function love.update(dt)
                         for j2, enmy in ipairs(enmie) do
                             local collision = enmy:resolveCollision(wall)
                             if collision then
-                                enmy.move = -enmy.move
+                                enmy.moveX = -enmy.moveX
+                                enmy.moveY = -enmy.moveY
                                 loop = true
                             end
                         end
@@ -375,7 +386,7 @@ function love.draw()
         mainmenu:draw()
     end
     if not WONTHEGAME and not LOSTTHEGAME and currentState ~= GameStates[1] and not noPlr and not noWinWall then
-        love.graphics.draw(bgd, 0, 0)
+        love.graphics.draw(bgd, 0, 0, 0, ScaleX, ScaleY)
 
         for i,v in ipairs(objects) do
             v:draw()
@@ -426,7 +437,9 @@ function love.keypressed(key)
             WONTHEGAME = false
             LOSTTHEGAME = false
             currentState = GameStates[1]
-            winSong:stop()
+            if winSong then
+                winSong:stop()
+            end
             random_reset()
         end
         return
@@ -443,6 +456,15 @@ function love.keypressed(key)
     end
 
     if currentState == GameStates[2] or currentState == GameStates[3] then
+        if key == "escape" then
+            WONTHEGAME = false
+            LOSTTHEGAME = false
+            currentState = GameStates[1]
+            if winSong then
+                winSong:stop()
+            end
+            random_reset()
+        end
         return
     end
 

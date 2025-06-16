@@ -2,8 +2,8 @@ WinScreen = Object:extend()
 
 function WinScreen:new()
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
-    self.x = math.random(800-80)
-    self.y = math.random(600-180)
+    self.x = math.random(love.graphics.getWidth()-80)
+    self.y = math.random(love.graphics.getHeight()-180)
     self.dx = math.random(-1,1)
     self.dy = math.random(-1,1)
     self.textChangeTimer = 0
@@ -52,10 +52,10 @@ function WinScreen:draw()
         end
         self.x = self.x + self.dx
         self.y = self.y + self.dy
-        if self.x >= 800-60 or self.x < 0 then
+        if self.x >= love.graphics.getWidth()-60 or self.x < 0 then
             self.dx = - self.dx
         end
-        if self.y >= 600-180 or self.y < 0 then
+        if self.y >= love.graphics.getHeight()-180 or self.y < 0 then
             self.dy = - self.dy
         end
     end
