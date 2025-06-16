@@ -5,8 +5,8 @@ local indexNum = 1
 
 function MainMenu:new()
     menu = love.graphics.newImage("assets/MenuBox.png")
-    font = love.graphics.newFont("assets/Mojangles.ttf", 20*ScaleY)
-    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleY)
+    font = love.graphics.newFont("assets/Mojangles.ttf", 20*ScaleX)
+    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleX)
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.DT = 0

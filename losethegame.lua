@@ -4,6 +4,8 @@ local isVideo = false
 local lastSound
 local lastVid
 local wasVid = false
+local vidChance = 0
+local DeltaTime = 0
 
 function LoseScreen:new()
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
@@ -43,12 +45,14 @@ end
 function LoseScreen:RandomSFX()
     random_reset()
     local bruh = GetFileNames("assets/goofSFX/")
-    local rng = math.random(1, #bruh)
-    local rng2 = math.random(1, #bruh/2)
-    if rng2 == rng then
+    local rng = math.random(#bruh)
+    local rng2 = math.random(#bruh)
+    print(rng2/#bruh, vidChance)
+    if (rng2/#bruh) <= vidChance then
         wasVid = true
     end
-    if wasVid or rng2 == rng and not (self.deathCount >= self.DeathsNeededForLobotomy) then
+    if (wasVid or (rng2/#bruh) <= vidChance) and not (self.deathCount >= self.DeathsNeededForLobotomy) then
+        vidChance = 0
         wasVid = false
         isVideo = true
         bruh = GetFileNames("assets/goofVids/")
@@ -71,6 +75,7 @@ function LoseScreen:RandomSFX()
         lastVid = file
         return "assets/goofVids/"..file
     else
+        vidChance = vidChance + rng2/#bruh
         isVideo = false
         local file = bruh[rng]
         if file == lastSound then
@@ -89,6 +94,7 @@ function LoseScreen:ErrorReports()
 end
 
 function LoseScreen:update(dt)
+    DeltaTime = dt
     if self.Video then
         if not self.Video:isPlaying() then
             self.Video:rewind()
