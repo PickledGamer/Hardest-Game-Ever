@@ -5,7 +5,6 @@ function Player:new(x, y)
     self.strength = 10
     self.canBeHit = true
     self.Hit = false
-    self.canJump = false
     self.weight = 0
 end
 
@@ -25,22 +24,10 @@ function Player:update(dt)
     end
 end
 
---! file: player.lua
 function Player:collide(e, direction)
     Player.super.collide(self, e, direction)
-    if direction == "bottom" then
-        self.canJump = true
-    end
 end
 
---! file: player.lua 
 function Player:checkResolve(e, direction)
-    if e:is(Box) then
-        if direction == "bottom" then
-            return true
-        else
-            return false
-        end
-    end
     return true
 end

@@ -12,6 +12,51 @@ local GameStates = {
     "CustomLevel"
 }
 
+local levelToLoad = nil
+local currentLevel = nil
+local LASTLEVEL = 0
+local lastsong = 0
+local lastwinsong = 0
+local objects = {}
+local walls = {}
+local enemies = {}
+local lobotomies = {}
+local player = nil
+local levels = nil
+local level = nil
+local WONTHEGAME = false
+local LOSTTHEGAME = false
+local winSong = nil
+local song = nil
+local noPlr = false
+local noWinWall = false
+local bgd = love.graphics.newImage("assets/Background.png")
+local currentState
+local mainmenu
+local winscreen
+local losescreen
+
+function love.load()
+    Object = require "classic"
+    require "entity"
+    require "enemy"
+    require "wall"
+    require "mainmenu"
+    require "winthegame"
+    require "losethegame"
+    require "lobotomy"
+    require "player"
+    currentState = GameStates[1]
+    --Create the walls table
+    ---- ADD THIS
+    
+    -------------
+
+    mainmenu = MainMenu()
+    winscreen = WinScreen()
+    losescreen = LoseScreen()
+end
+
 function random_reset()
     math.randomseed (os.time())
     local rnd = math.random(10)
@@ -53,25 +98,71 @@ function RandomWinSong()
     return love.audio.newSource("assets/goofWinMusic/"..file, "stream")
 end
 
-levelToLoad = nil
-currentLevel = nil
-LASTLEVEL = 0
-lastsong = 0
-lastwinsong = 0
-objects = {}
-walls = {}
-enemies = {}
-lobotomies = {}
-player = nil
-levels = nil
-level = nil
-WONTHEGAME = false
-LOSTTHEGAME = false
-winSong = nil
-song = nil
-noPlr = false
-noWinWall = false
-bgd = love.graphics.newImage("assets/Background.png")
+local function CheckObjectType(m)
+    for i,v in ipairs(m) do
+        local tab = {}
+        local entab = {}
+        for i2, v2 in ipairs(v) do
+            for j,w in ipairs(v2) do
+                if type(w) == "table" then
+                    for _,w2 in pairs(w) do
+                        if w2 == 1 then
+                            -- Add all the walls to the walls table instead.
+                            ---- CHANGE THIS
+                            local wa = Wall((j-1)*50, (i2-1)*50)
+                            table.insert(tab, wa)
+                            -------------
+                        elseif w2 == 2 then
+                            local wa = Wall((j-1)*50, (i2-1)*50)
+                            wa.canTouch = false
+                            wa.isFakeWall = true
+                            table.insert(tab, wa)
+                        elseif w2 == 3 then
+                            local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "up")
+                            table.insert(entab, en)
+                        elseif w2 == 4 then
+                            local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "left")
+                            table.insert(entab, en)
+                        elseif w2 == -1 then
+                            player = Player(((j-1)*50)+9, ((i2-1)*50)+9)
+                            level = i
+                            table.insert(objects, player)
+                        elseif w2 == -2 then
+                            local wa = Wall((j-1)*50, (i2-1)*50, 1)
+                            table.insert(tab, wa)
+                        end
+                    end
+                elseif w == 1 then
+                    -- Add all the walls to the walls table instead.
+                    ---- CHANGE THIS
+                    local wa = Wall((j-1)*50, (i2-1)*50)
+                    table.insert(tab, wa)
+                    -------------
+                elseif w == 2 then
+                    local wa = Wall((j-1)*50, (i2-1)*50)
+                    wa.canTouch = false
+                    wa.isFakeWall = true
+                    table.insert(tab, wa)
+                elseif w == 3 then
+                    local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "up")
+                    table.insert(entab, en)
+                elseif w == 4 then
+                    local en = Enemy(((j-1)*50)+9, ((i2-1)*50)+9, "left")
+                    table.insert(entab, en)
+                elseif w == -1 then
+                    player = Player(((j-1)*50)+9, ((i2-1)*50)+9)
+                    level = i
+                    table.insert(objects, player)
+                elseif w == -2 then
+                    local wa = Wall((j-1)*50, (i2-1)*50, 1)
+                    table.insert(tab, wa)
+                end
+            end
+        end
+        table.insert(walls, tab)
+        table.insert(enemies, entab)
+    end
+end
 
 local function loadLevel(dir)
     random_reset()
@@ -84,41 +175,8 @@ local function loadLevel(dir)
     levels = nil
     level = nil
     local map = require(dir)
-    for i,v in ipairs(map) do
-        local tab = {}
-        local entab = {}
-        for i2, v2 in ipairs(v) do
-            for j,w in ipairs(v2) do
-                if w == 1 then
-                    -- Add all the walls to the walls table instead.
-                    ---- CHANGE THIS
-                    local wa = Wall((j-1)*50, (i2-1)*50)
-                    table.insert(tab, wa)
-                    -------------
-                elseif w == 2 then
-                    local wa = Wall((j-1)*50, (i2-1)*50)
-                    wa.canTouch = false
-                    wa.isFakeWall = true
-                    table.insert(tab, wa)
-                elseif w == 3 then
-                    local en = Enemy(((j-1)*50)+8, ((i2-1)*50)+8, "up")
-                    table.insert(entab, en)
-                elseif w == 4 then
-                    local en = Enemy(((j-1)*50)+8, ((i2-1)*50)+8, "left")
-                    table.insert(entab, en)
-                elseif w == -1 then
-                    player = Player((j-1)*50, (i2-1)*50)
-                    level = i
-                    table.insert(objects, player)
-                elseif w == -2 then
-                    local wa = Wall((j-1)*50, (i2-1)*50, 1)
-                    table.insert(tab, wa)
-                end
-            end
-        end
-        table.insert(walls, tab)
-        table.insert(enemies, entab)
-    end
+
+    CheckObjectType(map)
 
     if player == nil then
         mainmenu:AddErrorText(levelToLoad.." Has No Player!", 2)
@@ -150,32 +208,21 @@ local function loadLevel(dir)
     return map
 end
 
-function love.load()
-    Object = require "classic"
-    require "entity"
-    require "player"
-    require "enemy"
-    require "wall"
-    require "mainmenu"
-    require "winthegame"
-    require "losethegame"
-    require "lobotomy"
-    currentState = GameStates[1]
-    --Create the walls table
-    ---- ADD THIS
-    
-    -------------
-
-    mainmenu = MainMenu()
-    winscreen = WinScreen()
-    losescreen = LoseScreen()
-end
-
 function love.update(dt)
+
+    for i,v in pairs(losescreen:ErrorReports()) do
+        if v then
+            mainmenu:AddErrorText(v[1], v[2])
+            table.remove(losescreen.SoundErrors, i)
+        end
+    end
 
     for i,v in pairs(lobotomies) do
         if v then
             v:update(dt)
+            if v.WhiteFade <= 0 and v.Fade <= 0 then
+                table.remove(lobotomies, i)
+            end
         end
     end
 
@@ -209,6 +256,9 @@ function love.update(dt)
     end
     if song then
         song:play()
+    end
+    if not player then
+        return
     end
     if player.x >= 800-16 then
         love.graphics.clear()
@@ -392,7 +442,7 @@ function love.keypressed(key)
         return
     end
 
-    if currentState == GameStates[2] then
+    if currentState == GameStates[2] or currentState == GameStates[3] then
         return
     end
 

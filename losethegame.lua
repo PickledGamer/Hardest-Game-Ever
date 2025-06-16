@@ -1,11 +1,9 @@
 LoseScreen = Object:extend()
 
 local isVideo = false
-local me = nil
 
 function LoseScreen:new()
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
-    me = self
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.played = false
@@ -29,7 +27,9 @@ function LoseScreen:new()
     self.G = 0
     self.B = 0
     self.CustomText = {}
-    self.Sound = RandomSFX()
+    self.Sound = nil
+    self.Video = nil
+    self.SoundErrors = {}
 end
 
 function GetFileNames(dir)
@@ -37,21 +37,43 @@ function GetFileNames(dir)
     return tab
 end
 
-function RandomSFX()
+function LoseScreen:RandomSFX()
+    random_reset()
     local bruh = GetFileNames("assets/goofSFX/")
     local rng = math.random(1, #bruh)
-    local rng2 = math.random(1, #bruh*2)
-    if rng2 == rng and not (me.deathCount >= me.DeathsNeededForLobotomy) then
+    local rng2 = math.random(1, #bruh*1.25)
+    if rng2 == rng and not (self.deathCount >= self.DeathsNeededForLobotomy) then
         isVideo = true
-        return love.graphics.newVideo("assets/hope im not to late.ogv")
+        bruh = GetFileNames("assets/goofVids/")
+        local tab = {}
+        for i,v in pairs(bruh) do
+            if not string.find(v, ".ogv") then
+                table.insert(tab, {v.." Is is not a .ogv file, convert it first", 20})
+                table.remove(bruh, i)
+            end
+        end
+        self.SoundErrors = tab
+        rng = math.random(1, #bruh)
+        local file = bruh[rng]
+        return "assets/goofVids/"..file
     else
         isVideo = false
         local file = bruh[rng]
-        return love.audio.newSource("assets/goofSFX/"..file, "stream")
+        return "assets/goofSFX/"..file
     end
 end
 
+function LoseScreen:ErrorReports()
+    return self.SoundErrors
+end
+
 function LoseScreen:update(dt)
+    if self.Video then
+        if not self.Video:isPlaying() then
+            self.Video:rewind()
+            self.Video:play()
+        end
+    end
 end
 
 function LoseScreen:draw()
@@ -64,14 +86,23 @@ function LoseScreen:draw()
     love.graphics.setColor(1,1,1,1)
     if not self.played then
         self.deathCount = self.deathCount + 1
-        self.Sound = RandomSFX()
+        local songOrVid = self:RandomSFX()
+        if isVideo then
+            self.Video = love.graphics.newVideo(songOrVid)
+        else
+            self.Sound = love.audio.newSource(songOrVid, "stream")
+        end
         self.played = true
         if self.deathCount >= self.DeathsNeededForLobotomy then
             self.InstantLobotomy = true
             self.deathCount = 0
             self.DeathsNeededForLobotomy = math.random(5)
         else
-            self.Sound:play()
+            if isVideo then
+                self.Video:play()
+            else
+                self.Sound:play()
+            end
         end
     end
     if not isVideo then
@@ -84,18 +115,20 @@ function LoseScreen:draw()
             offset = offset + 20
         end
     else
-        love.graphics.draw(self.Sound, love.graphics.getWidth()/2 - 480/2, love.graphics.getHeight()/2 - 360/2)
+        --love.graphics.draw(self.Sound, love.graphics.getWidth()/2 - self.Sound:getWidth()/2, love.graphics.getHeight()/2 - self.Sound:getHeight()/2)
+        love.graphics.draw(self.Video, 0, 0, 0, love.graphics.getWidth()/self.Video:getWidth(), love.graphics.getHeight()/self.Video:getHeight())
     end
 end
 
 function LoseScreen:keypressed(key)
     if key then
         if isVideo then
-            self.Sound:release()
+            self.Video:release()
         else
             self.Sound:stop()
         end
         self.Sound = nil
+        self.Video = nil
         self.played = false
         return "Sigma"
     end

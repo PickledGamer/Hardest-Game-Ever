@@ -2,6 +2,7 @@ MainMenu = Object:extend()
 
 local indexNum = 1
 
+
 function MainMenu:new()
     menu = love.graphics.newImage("assets/MenuBox.png")
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
@@ -19,7 +20,7 @@ function MainMenu:new()
         "CustomLevels",
         "Quit :("
     }
-    local str = love.filesystem.getSourceBaseDirectory()
+    local str = love.filesystem.getWorkingDirectory()
     local str2 = str
     str2 = string.sub(str2, 1, 2)
     str = string.sub(str, 3, string.len(str))
@@ -27,9 +28,9 @@ function MainMenu:new()
     str = str2 .. str
     self.CoolStuff = {
         "add your own music by replacing files",
-        "or add files to the goofMusic folder",
-        "goofSFX & goofWinMusic is the same way",
-        "folders are here: "..str.."/assets/"
+        "or add files to the folders in /assets/",
+        "all the folders in /assets/ can be added to",
+        "here: "..str.."/assets/"
     }
     self.Title = "BrainRot"
     self.Errors = {}
@@ -38,7 +39,7 @@ function MainMenu:new()
     self.song:isLooping()
 end
 
-function GETCUSTOMLEVELS(dir)
+local function GETCUSTOMLEVELS(dir)
     local tab = love.filesystem.getDirectoryItems(dir)
     local tab2 = {}
     for i,v in pairs(tab) do
@@ -98,8 +99,8 @@ function MainMenu:draw()
     local offset = 0
     for i,v in pairs(self.Errors) do
         if v[1] and v[2] then
-            local length = string.len(v[1])
-            love.graphics.print(v[1], love.graphics.getWidth()/1.5 - (1.35*length), 10 + offset)
+            local length = font:getWidth(v[1])
+            love.graphics.print(v[1], love.graphics.getWidth() - length, 10 + offset)
             if v[2] > 0 then
                 v[2] = v[2] - self.DT
             else
