@@ -47,7 +47,6 @@ function LoseScreen:RandomSFX()
     local bruh = GetFileNames("assets/goofSFX/")
     local rng = math.random(#bruh)
     local rng2 = math.random(#bruh)
-    print(rng2/#bruh, vidChance)
     if (rng2/#bruh) <= vidChance then
         wasVid = true
     end

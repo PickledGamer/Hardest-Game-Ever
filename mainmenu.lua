@@ -9,6 +9,7 @@ function MainMenu:new()
     font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleX)
     self.textChangeTimer = 0
     self.InCustomLevels = false
+    self.InOptionsMenu = false
     self.DT = 0
     self.Warning = {
         "This Game Contains Flashing Images and Loud Sounds",
@@ -18,6 +19,7 @@ function MainMenu:new()
     self.MenuText = {
         "Play",
         "CustomLevels",
+        "Options",
         "Quit :("
     }
     local str = love.filesystem.getWorkingDirectory()
@@ -31,6 +33,12 @@ function MainMenu:new()
         "or add files to the folders in /assets/",
         "all the folders in /assets/ can be added to",
         "here: "..str.."/assets/"
+    }
+    self.OptionsShit = {
+        "AlexMode :O",
+        "Gravity",
+        "UltraSaiyan",
+        "Fullscreen"
     }
     self.Title = "BrainRot"
     self.Errors = {}
@@ -68,7 +76,18 @@ function MainMenu:draw()
         warnOffset = warnOffset + 32
     end
     love.graphics.setFont(font)
-    if self.InCustomLevels then
+    if self.InOptionsMenu then
+        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,(ScaleY+#self.OptionsShit/10))
+        local offset = 0
+        for i, v in pairs(self.CustomText) do
+            if indexNum == i then
+                love.graphics.setColor(0.7,0.6,0.2,1)
+            end
+            love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
+            offset = offset + 20
+            love.graphics.setColor(1,1,1,1)
+        end
+    elseif self.InCustomLevels then
         self.CustomText = GETCUSTOMLEVELS("CustomLevels")
         love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,(ScaleY+#self.CustomText/10))
         local offset = 0
@@ -127,6 +146,8 @@ function MainMenu:keypressed(key)
     if key == "escape" then
         if self.InCustomLevels then
             self.InCustomLevels = false
+        elseif self.InOptionsMenu then
+            self.InOptionsMenu = false
         else
             love.event.quit()
         end
@@ -136,6 +157,20 @@ function MainMenu:keypressed(key)
     end
     if key == "down" then
         indexNum = indexNum + 1
+    end
+    if key == "left" then
+        if self.InOptionsMenu then
+            if indexNum == 5 then
+                MasterVolume = MasterVolume - 1
+            end
+        end
+    end
+    if key == "right" then
+        if self.InOptionsMenu then
+            if indexNum == 5 then
+                MasterVolume = MasterVolume + 1
+            end
+        end
     end
     if key == "return" then
         if not self.InCustomLevels then
@@ -149,8 +184,20 @@ function MainMenu:keypressed(key)
                 else
                     self.InCustomLevels = true
                 end
+            elseif indexNum == 3 then
+                self.InOptionsMenu = true
             elseif indexNum == #self.MenuText then
                 love.event.quit()
+            end
+        elseif  self.InOptionsMenu then
+            if indexNum == 1 then
+                AlexMode = not AlexMode
+            elseif indexNum == 2 then
+                Gravity = not Gravity
+            elseif indexNum == 3 then
+                UltraSaiyan = not UltraSaiyan
+            elseif indexNum == 4 then
+                Fullscreen = not Fullscreen
             end
         else
             self.song:stop()

@@ -1,5 +1,5 @@
 love.window.setTitle("BrainRot")
-love.window.setFullscreen(false, "desktop")
+love.window.setFullscreen(true, "desktop")
 ScaleX = (love.graphics.getWidth()/800)
 ScaleY = (love.graphics.getHeight()/600)
 
@@ -9,7 +9,13 @@ if arg[2] == "debug" then
     require("lldebugger").start()
 end
 
-local AlexMode = false
+AlexMode = false -- debugging, no dmg
+Gravity = false -- breaks the game
+UltraSaiyan = false -- pop-up for fart sfx
+Fullscreen = false -- this is obvious
+MasterVolume = 100 -- VOLUME FOR SHIT
+
+function GrabTitty() if Gravity then return 100 else return 0 end end
 
 local GameStates = {
     "InMenu",

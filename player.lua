@@ -7,7 +7,7 @@ function Player:new(x, y)
     self.moveX = 200*ScaleX
     self.moveY = 200*ScaleY
     self.Hit = false
-    self.weight = 0
+    self.weight = GrabTitty()
 end
 
 function Player:update(dt)
