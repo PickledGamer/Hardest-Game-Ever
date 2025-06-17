@@ -9,6 +9,7 @@ local DeltaTime = 0
 
 function LoseScreen:new()
     font = love.graphics.newFont("assets/Mojangles.ttf", 20)
+    self.UltraSaiyan = love.graphics.newImage("assets/ultrasaiyan3.png")
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.played = false
@@ -115,8 +116,13 @@ function LoseScreen:draw()
         local songOrVid = self:RandomSFX()
         if isVideo then
             self.Video = love.graphics.newVideo(songOrVid)
+            local audio = self.Video:getSource()
+            if audio then
+                audio:setVolume(SFXVolume/100)
+            end
         else
             self.Sound = love.audio.newSource(songOrVid, "stream")
+            self.Sound:setVolume(SFXVolume/100)
         end
         self.played = true
         if self.deathCount >= self.DeathsNeededForLobotomy then
@@ -137,12 +143,16 @@ function LoseScreen:draw()
         for i, v in pairs(self.MenuText) do
 
             love.graphics.setColor(self.R,self.G,self.B,1)
-            love.graphics.print(v, love.graphics.getWidth()/2 - 32, (love.graphics.getHeight()/2 - 64) + offset)
-            offset = offset + 20
+            love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()*#self.MenuText/2) + offset)
+            offset = offset + font:getHeight()
         end
     else
         --love.graphics.draw(self.Sound, love.graphics.getWidth()/2 - self.Sound:getWidth()/2, love.graphics.getHeight()/2 - self.Sound:getHeight()/2)
         love.graphics.draw(self.Video, 0, 0, 0, love.graphics.getWidth()/self.Video:getWidth(), love.graphics.getHeight()/self.Video:getHeight())
+    end
+    if UltraSaiyan and self.Sound and self.Sound:isPlaying() then
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.draw(self.UltraSaiyan,-self.UltraSaiyan:getWidth()*0.75,-self.UltraSaiyan:getHeight()*0.175)
     end
 end
 

@@ -1,7 +1,9 @@
 MainMenu = Object:extend()
 
 local indexNum = 1
-
+local MasterVolumeSubNum = 0
+local SFXVolumeSubNum = 0
+local MusicVolumeSubNum = 0
 
 function MainMenu:new()
     menu = love.graphics.newImage("assets/MenuBox.png")
@@ -35,10 +37,21 @@ function MainMenu:new()
         "here: "..str.."/assets/"
     }
     self.OptionsShit = {
-        "AlexMode :O",
+        "AlexMode",
         "Gravity",
         "UltraSaiyan",
-        "Fullscreen"
+        "Fullscreen",
+        "MasterVolume",
+        "SFXVolume",
+        "MusicVolume",
+        "SaveData"
+    }
+    self.OptionDisplayValues = {
+        false,
+        false,
+        false,
+        false,
+        100
     }
     self.Title = "BrainRot"
     self.Errors = {}
@@ -54,11 +67,55 @@ local function GETCUSTOMLEVELS(dir)
         local returnString = string.gsub(v, ".lua", "")
         table.insert(tab2, returnString)
     end
+
     return tab2
 end
 
+function MainMenu:LOADDATA(tab)
+    if tab then
+        MasterVolumeSubNum = tab[1]
+        SFXVolumeSubNum = tab[2]
+        MusicVolumeSubNum = tab[3]
+    end
+end
+
 function MainMenu:update(dt)
+    font = love.graphics.newFont("assets/Mojangles.ttf", 20*ScaleX)
+    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleX)
+    self.song:setVolume(MusicVolume/100)
+    MasterVolume = 100 - MasterVolumeSubNum
+    SFXVolume = 100 - SFXVolumeSubNum
+    MusicVolume = 100 - MusicVolumeSubNum
     self.DT = dt
+    self.OptionDisplayValues[1] = AlexMode
+    self.OptionDisplayValues[2] = Gravity
+    self.OptionDisplayValues[3] = UltraSaiyan
+    self.OptionDisplayValues[4] = Fullscreen
+    self.OptionDisplayValues[5] = math.round(MasterVolume)
+    self.OptionDisplayValues[6] = math.round(SFXVolume)
+    self.OptionDisplayValues[7] = math.round(MusicVolume)
+    if love.keyboard.isDown("left") then
+        if self.InOptionsMenu then
+            if indexNum == 5 and MasterVolumeSubNum < 100 then
+                MasterVolumeSubNum = MasterVolumeSubNum + 2*(dt*math.pi)
+            elseif indexNum == 6 and SFXVolumeSubNum < 100 then
+                SFXVolumeSubNum = SFXVolumeSubNum + 2*(dt*math.pi)
+            elseif indexNum == 7 and MusicVolumeSubNum < 100 then
+                MusicVolumeSubNum = MusicVolumeSubNum + 2*(dt*math.pi)
+            end
+        end
+    end
+    if love.keyboard.isDown("right") then
+        if self.InOptionsMenu then
+            if indexNum == 5 and MasterVolumeSubNum > 0 then
+                MasterVolumeSubNum = MasterVolumeSubNum - 2*(dt*math.pi)
+            elseif indexNum == 6 and SFXVolumeSubNum > 0 then
+                SFXVolumeSubNum = SFXVolumeSubNum - 2*(dt*math.pi)
+            elseif indexNum == 7 and MusicVolumeSubNum > 0 then
+                MusicVolumeSubNum = MusicVolumeSubNum - 2*(dt*math.pi)
+            end
+        end
+    end
     if self.MenuText[2] ~= "CustomLevels" and self.textChangeTimer <= 0 then
         self.MenuText[2] = "CustomLevels"
     else
@@ -73,46 +130,62 @@ function MainMenu:draw()
     for i, v in pairs(self.Warning) do
         love.graphics.setColor(1,1,1,1)
         love.graphics.print(v, 31, 62 + warnOffset)
-        warnOffset = warnOffset + 32
+        warnOffset = warnOffset + font:getHeight()
     end
     love.graphics.setFont(font)
     if self.InOptionsMenu then
-        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,(ScaleY+#self.OptionsShit/10))
-        local offset = 0
-        for i, v in pairs(self.CustomText) do
+        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY)
+        local offset = -font:getHeight()*2
+        for i, v in pairs(self.OptionsShit) do
             if indexNum == i then
                 love.graphics.setColor(0.7,0.6,0.2,1)
             end
-            love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
-            offset = offset + 20
+            if i == #self.OptionsShit then
+                love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/1.5, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
+            else
+                love.graphics.print(v..": "..tostring(self.OptionDisplayValues[i]), love.graphics.getWidth()/2 - font:getWidth(v)/1.5, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
+            end
+            if Fullscreen then
+                offset = offset + font:getHeight()/(ScaleY/1.5)
+            else
+                offset = offset + font:getHeight()
+            end
             love.graphics.setColor(1,1,1,1)
         end
     elseif self.InCustomLevels then
         self.CustomText = GETCUSTOMLEVELS("CustomLevels")
-        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,(ScaleY+#self.CustomText/10))
-        local offset = 0
+        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY)
+        local offset = -font:getHeight()
         for i, v in pairs(self.CustomText) do
             if indexNum == i then
                 love.graphics.setColor(0.7,0.6,0.2,1)
             end
             love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
-            offset = offset + 20
+            if Fullscreen then
+                offset = offset + font:getHeight()/(ScaleY/1.5)
+            else
+                offset = offset + font:getHeight()
+            end
             love.graphics.setColor(1,1,1,1)
         end
     else
         love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY)
-        local offset = 0
+        local offset = -font:getHeight()
         for i, v in pairs(self.MenuText) do
             if indexNum == i then
                 love.graphics.setColor(0.7,0.6,0.2,1)
             end
             love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
-            offset = offset + 20
+            if Fullscreen then
+                offset = offset + font:getHeight()/(ScaleY/1.5)
+            else
+                offset = offset + font:getHeight()
+            end
             love.graphics.setColor(1,1,1,1)
         end
     end
     love.graphics.setFont(font2)
-    love.graphics.print(self.Title, love.graphics.getWidth()/2 - font2:getWidth(self.Title)/2, love.graphics.getHeight()/2 - font2:getHeight()*2)
+    love.graphics.print(self.Title, love.graphics.getWidth()/2 - font2:getWidth(self.Title)/2.25, love.graphics.getHeight()/2 - font2:getHeight()*3.5)
     love.graphics.setFont(font)
     love.graphics.setColor(1,0,0,1)
     local offset = 0
@@ -126,14 +199,14 @@ function MainMenu:draw()
                 table.remove(self.Errors, i)
             end
         end
-        offset = offset + 20
+        offset = offset + font:getHeight()
     end
     local offset = 0
     for i,v in pairs(self.CoolStuff) do
         if v then
             love.graphics.print(v, 31 , love.graphics.getHeight()/1.25 + offset)
         end
-        offset = offset + 20
+        offset = offset + font:getHeight()
     end
     love.graphics.setColor(1,1,1,1)
 end
@@ -141,14 +214,36 @@ end
 function MainMenu:AddErrorText(errorMsg, lifeTime)
     table.insert(self.Errors, {errorMsg, lifeTime})
 end
+local function SaveData()
+    local dataToSave = {
+        AlexMode,
+        Gravity,
+        UltraSaiyan,
+        Fullscreen,
+        MasterVolumeSubNum,
+        SFXVolumeSubNum,
+        MusicVolumeSubNum
+    }
+    for i,v in pairs(dataToSave) do
+        if type(v) == "boolean" then
+            if v == true then
+                dataToSave[i] = "true"
+            else
+                dataToSave[i] = "false"
+            end
+        end
+    end
+    love.filesystem.write("data.dat", table.concat(dataToSave,"\n"))
+end
 
 function MainMenu:keypressed(key)
-    if key == "escape" then
+    if key == "escape" or key == "backspace" then
         if self.InCustomLevels then
             self.InCustomLevels = false
         elseif self.InOptionsMenu then
             self.InOptionsMenu = false
         else
+            SaveData()
             love.event.quit()
         end
     end
@@ -158,22 +253,8 @@ function MainMenu:keypressed(key)
     if key == "down" then
         indexNum = indexNum + 1
     end
-    if key == "left" then
-        if self.InOptionsMenu then
-            if indexNum == 5 then
-                MasterVolume = MasterVolume - 1
-            end
-        end
-    end
-    if key == "right" then
-        if self.InOptionsMenu then
-            if indexNum == 5 then
-                MasterVolume = MasterVolume + 1
-            end
-        end
-    end
     if key == "return" then
-        if not self.InCustomLevels then
+        if not self.InCustomLevels and not self.InOptionsMenu then
             if indexNum == 1 then
                 self.song:stop()
                 return "Playing"
@@ -187,6 +268,7 @@ function MainMenu:keypressed(key)
             elseif indexNum == 3 then
                 self.InOptionsMenu = true
             elseif indexNum == #self.MenuText then
+                SaveData()
                 love.event.quit()
             end
         elseif  self.InOptionsMenu then
@@ -198,22 +280,30 @@ function MainMenu:keypressed(key)
                 UltraSaiyan = not UltraSaiyan
             elseif indexNum == 4 then
                 Fullscreen = not Fullscreen
+            elseif indexNum == #self.OptionsShit then
+                SaveData()
             end
         else
             self.song:stop()
             return "Custom", self.CustomText[indexNum]
         end
     end
-    if not self.InCustomLevels then
+    if self.InCustomLevels then
         if indexNum < 1 then
-            indexNum = #self.MenuText
-        elseif indexNum > #self.MenuText then
+            indexNum = #self.CustomText
+        elseif indexNum > #self.CustomText then
+            indexNum = 1
+        end
+    elseif self.InOptionsMenu then
+        if indexNum < 1 then
+            indexNum = #self.OptionsShit
+        elseif indexNum > #self.OptionsShit then
             indexNum = 1
         end
     else
         if indexNum < 1 then
-            indexNum = #self.CustomText
-        elseif indexNum > #self.CustomText then
+            indexNum = #self.MenuText
+        elseif indexNum > #self.MenuText then
             indexNum = 1
         end
     end

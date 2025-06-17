@@ -22,6 +22,7 @@ function Lobotomy:new()
 end
 
 function Lobotomy:update(dt)
+    self.Sound:setVolume(SFXVolume/100)
     if self.WhiteFade > 0.5 then
         self.WhiteFade = self.WhiteFade - dt/4
         self.Fade = self.Fade - dt/8

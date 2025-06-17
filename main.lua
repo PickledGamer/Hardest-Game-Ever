@@ -1,5 +1,4 @@
 love.window.setTitle("BrainRot")
-love.window.setFullscreen(true, "desktop")
 ScaleX = (love.graphics.getWidth()/800)
 ScaleY = (love.graphics.getHeight()/600)
 
@@ -9,11 +8,32 @@ if arg[2] == "debug" then
     require("lldebugger").start()
 end
 
+function GetFileNames(dir)
+    local tab = love.filesystem.getDirectoryItems(dir)
+    return tab
+end
+
 AlexMode = false -- debugging, no dmg
 Gravity = false -- breaks the game
 UltraSaiyan = false -- pop-up for fart sfx
 Fullscreen = false -- this is obvious
 MasterVolume = 100 -- VOLUME FOR SHIT
+SFXVolume = 100 -- guess
+MusicVolume = 100 -- who could havent guessing
+
+function string.split(str)
+    local tab = {}
+    local length = string.len(str)
+    for i = 1, length do
+        local cut = string.sub(str, i, i)
+        table.insert(tab, cut)
+    end
+    return tab
+end
+
+function math.round(x)
+    return x>=0 and math.floor(x+0.5) or math.ceil(x-0.5)
+end
 
 function GrabTitty() if Gravity then return 100 else return 0 end end
 
@@ -71,6 +91,53 @@ function love.load()
     mainmenu = MainMenu()
     winscreen = WinScreen()
     losescreen = LoseScreen()
+
+    if not love.filesystem.read("data.dat") then
+        local dataToSave = {
+            false,
+            false,
+            false,
+            false,
+            0,
+            0,
+            0
+        }
+        for i,v in pairs(dataToSave) do
+            if type(v) == "boolean" then
+                if v == true then
+                    dataToSave[i] = "true"
+                else
+                    dataToSave[i] = "false"
+                end
+            end
+        end
+        love.filesystem.write("data.dat", table.concat(dataToSave,"\n"))
+    end
+
+
+    local datas = {}
+    for lines in love.filesystem.lines("data.dat") do
+        table.insert(datas,lines)
+    end
+    for i,v in pairs(datas) do
+        if v == "true" then
+            datas[i] = true
+        elseif v == "false" then
+            datas[i] = false
+        end
+    end
+    if #datas > 1 then
+        AlexMode = datas[1]
+        Gravity = datas[2]
+        UltraSaiyan = datas[3]
+        Fullscreen = datas[4]
+        local blahblah = {}
+        table.insert(blahblah, tonumber(datas[5]))
+        table.insert(blahblah, tonumber(datas[6]))
+        table.insert(blahblah, tonumber(datas[7]))
+        mainmenu:LOADDATA(blahblah)
+    end
+
 end
 
 function random_reset()
@@ -79,11 +146,6 @@ function random_reset()
     for i = 1,rnd do
         math.random()
     end
-end
-
-function GetFileNames(dir)
-    local tab = love.filesystem.getDirectoryItems(dir)
-    return tab
 end
 
 function RandomSong()
@@ -213,8 +275,10 @@ local function loadLevel(dir)
     random_reset()
     winSong = RandomWinSong()
     winSong:isLooping()
+    winSong:setVolume(MusicVolume/100)
     song = RandomSong()
     song:isLooping()
+    song:setVolume(MusicVolume/100)
     if noPlr or noWinWall then
         mainmenu.InCustomLevels = false
         currentState = GameStates[1]
@@ -225,7 +289,19 @@ local function loadLevel(dir)
 end
 
 function love.update(dt)
-
+    if Fullscreen then
+        love.window.setFullscreen(true, "desktop")
+    else
+        love.window.setFullscreen(false, "desktop")
+    end
+    ScaleX = (love.graphics.getWidth()/800)
+    ScaleY = (love.graphics.getHeight()/600)
+    xPosScale = 50*ScaleX
+    yPosScale = 50*ScaleY
+    entXOffset = 9*ScaleX
+    entYOffset = 9*ScaleY
+    
+    love.audio.setVolume(MasterVolume/100)
     for i,v in pairs(losescreen:ErrorReports()) do
         if v then
             mainmenu:AddErrorText(v[1], v[2])
@@ -345,6 +421,8 @@ function love.update(dt)
                         local collision = object:resolveCollision(wall)
                         if collision then
                             if wall.winWall then
+                                winscreen.x = math.random(800*ScaleX-80)
+                                winscreen.y = math.random(600*ScaleY-180)
                                 WONTHEGAME = true
                             end
                             loop = true
