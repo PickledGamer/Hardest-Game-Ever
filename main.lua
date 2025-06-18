@@ -344,7 +344,9 @@ function love.update(dt)
 
     if WONTHEGAME then
         song:stop()
-        winSong:play()
+        if winSong and not winSong:isPlaying() then
+            winSong:play()
+        end
         winscreen:update(dt)
         return
     end
@@ -370,7 +372,7 @@ function love.update(dt)
         end
         LASTLEVEL = #levels
     end
-    if song then
+    if song and not song:isPlaying() then
         song:play()
     end
     if not player then
