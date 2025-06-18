@@ -292,10 +292,8 @@ local function loadLevel(dir)
     end
     random_reset()
     winSong = RandomWinSong()
-    winSong:isLooping()
     winSong:setVolume(MusicVolume/100)
     song = RandomSong()
-    song:isLooping()
     song:setVolume(MusicVolume/100)
     if noPlr or noWinWall then
         mainmenu.InCustomLevels = false
