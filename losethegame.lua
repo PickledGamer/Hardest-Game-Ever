@@ -145,6 +145,7 @@ function LoseScreen:draw()
             love.graphics.setColor(self.R,self.G,self.B,1)
             love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/2, (love.graphics.getHeight()/2 - font:getHeight()*#self.MenuText/2) + offset)
             offset = offset + font:getHeight()
+            love.graphics.setColor(1,1,1,1)
         end
     else
         --love.graphics.draw(self.Sound, love.graphics.getWidth()/2 - self.Sound:getWidth()/2, love.graphics.getHeight()/2 - self.Sound:getHeight()/2)
@@ -152,7 +153,7 @@ function LoseScreen:draw()
     end
     if UltraSaiyan and self.Sound and self.Sound:isPlaying() then
         love.graphics.setColor(1,1,1,1)
-        love.graphics.draw(self.UltraSaiyan,-self.UltraSaiyan:getWidth()*0.75,-self.UltraSaiyan:getHeight()*0.175)
+        love.graphics.draw(self.UltraSaiyan,0,0)
     end
 end
 

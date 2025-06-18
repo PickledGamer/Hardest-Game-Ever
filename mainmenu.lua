@@ -41,6 +41,8 @@ function MainMenu:new()
         "Gravity",
         "UltraSaiyan",
         "Fullscreen",
+        "FPSCounter",
+        "VSync",
         "MasterVolume",
         "SFXVolume",
         "MusicVolume",
@@ -91,27 +93,29 @@ function MainMenu:update(dt)
     self.OptionDisplayValues[2] = Gravity
     self.OptionDisplayValues[3] = UltraSaiyan
     self.OptionDisplayValues[4] = Fullscreen
-    self.OptionDisplayValues[5] = math.round(MasterVolume)
-    self.OptionDisplayValues[6] = math.round(SFXVolume)
-    self.OptionDisplayValues[7] = math.round(MusicVolume)
+    self.OptionDisplayValues[5] = FPSCounter
+    self.OptionDisplayValues[6] = VSync
+    self.OptionDisplayValues[7] = math.round(MasterVolume)
+    self.OptionDisplayValues[8] = math.round(SFXVolume)
+    self.OptionDisplayValues[9] = math.round(MusicVolume)
     if love.keyboard.isDown("left") then
         if self.InOptionsMenu then
-            if indexNum == 5 and MasterVolumeSubNum < 100 then
+            if indexNum == 7 and MasterVolumeSubNum < 100 then
                 MasterVolumeSubNum = MasterVolumeSubNum + 2*(dt*math.pi)
-            elseif indexNum == 6 and SFXVolumeSubNum < 100 then
+            elseif indexNum == 8 and SFXVolumeSubNum < 100 then
                 SFXVolumeSubNum = SFXVolumeSubNum + 2*(dt*math.pi)
-            elseif indexNum == 7 and MusicVolumeSubNum < 100 then
+            elseif indexNum == 9 and MusicVolumeSubNum < 100 then
                 MusicVolumeSubNum = MusicVolumeSubNum + 2*(dt*math.pi)
             end
         end
     end
     if love.keyboard.isDown("right") then
         if self.InOptionsMenu then
-            if indexNum == 5 and MasterVolumeSubNum > 0 then
+            if indexNum == 7 and MasterVolumeSubNum > 0 then
                 MasterVolumeSubNum = MasterVolumeSubNum - 2*(dt*math.pi)
-            elseif indexNum == 6 and SFXVolumeSubNum > 0 then
+            elseif indexNum == 8 and SFXVolumeSubNum > 0 then
                 SFXVolumeSubNum = SFXVolumeSubNum - 2*(dt*math.pi)
-            elseif indexNum == 7 and MusicVolumeSubNum > 0 then
+            elseif indexNum == 9 and MusicVolumeSubNum > 0 then
                 MusicVolumeSubNum = MusicVolumeSubNum - 2*(dt*math.pi)
             end
         end
@@ -134,7 +138,11 @@ function MainMenu:draw()
     end
     love.graphics.setFont(font)
     if self.InOptionsMenu then
-        love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY)
+        --if Fullscreen then
+            love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY+(font:getHeight()*#self.OptionsShit/10)/100)
+        --else
+        
+        --end
         local offset = -font:getHeight()*2
         for i, v in pairs(self.OptionsShit) do
             if indexNum == i then
@@ -185,7 +193,11 @@ function MainMenu:draw()
         end
     end
     love.graphics.setFont(font2)
-    love.graphics.print(self.Title, love.graphics.getWidth()/2 - font2:getWidth(self.Title)/2.25, love.graphics.getHeight()/2 - font2:getHeight()*3.5)
+    if Fullscreen then
+        love.graphics.print(self.Title, love.graphics.getWidth()/2 - font2:getWidth(self.Title)/2, (love.graphics.getHeight()/2 - font2:getHeight()*2.5))
+    else
+        love.graphics.print(self.Title, love.graphics.getWidth()/2 - font2:getWidth(self.Title)/2, (love.graphics.getHeight()/2 - font2:getHeight()*3))
+    end
     love.graphics.setFont(font)
     love.graphics.setColor(1,0,0,1)
     local offset = 0
@@ -201,6 +213,7 @@ function MainMenu:draw()
         end
         offset = offset + font:getHeight()
     end
+    love.graphics.setColor(1,1,1,1)
     local offset = 0
     for i,v in pairs(self.CoolStuff) do
         if v then
@@ -220,6 +233,8 @@ local function SaveData()
         Gravity,
         UltraSaiyan,
         Fullscreen,
+        FPSCounter,
+        VSync,
         MasterVolumeSubNum,
         SFXVolumeSubNum,
         MusicVolumeSubNum
@@ -280,6 +295,10 @@ function MainMenu:keypressed(key)
                 UltraSaiyan = not UltraSaiyan
             elseif indexNum == 4 then
                 Fullscreen = not Fullscreen
+            elseif indexNum == 5 then
+                FPSCounter = not FPSCounter
+            elseif indexNum == 6 then
+                VSync = not VSync
             elseif indexNum == #self.OptionsShit then
                 SaveData()
             end

@@ -3,6 +3,7 @@ ScaleX = (love.graphics.getWidth()/800)
 ScaleY = (love.graphics.getHeight()/600)
 
 io.stdout:setvbuf("no")
+DELTATIME = 0
 
 if arg[2] == "debug" then
     require("lldebugger").start()
@@ -12,11 +13,14 @@ function GetFileNames(dir)
     local tab = love.filesystem.getDirectoryItems(dir)
     return tab
 end
+local numOfOptions = 9
 
 AlexMode = false -- debugging, no dmg
 Gravity = false -- breaks the game
 UltraSaiyan = false -- pop-up for fart sfx
 Fullscreen = false -- this is obvious
+FPSCounter = false
+VSync = true
 MasterVolume = 100 -- VOLUME FOR SHIT
 SFXVolume = 100 -- guess
 MusicVolume = 100 -- who could havent guessing
@@ -72,6 +76,30 @@ local yPosScale = 50*ScaleY
 local entXOffset = 9*ScaleX
 local entYOffset = 9*ScaleY
 
+function newSave()
+    local dataToSave = {
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        0,
+        0,
+        0
+    }
+    for i,v in pairs(dataToSave) do
+        if type(v) == "boolean" then
+            if v == true then
+                dataToSave[i] = "true"
+            else
+                dataToSave[i] = "false"
+            end
+        end
+    end
+    love.filesystem.write("data.dat", table.concat(dataToSave,"\n"))
+end
+
 function love.load()
     Object = require "classic"
     require "entity"
@@ -93,31 +121,19 @@ function love.load()
     losescreen = LoseScreen()
 
     if not love.filesystem.read("data.dat") then
-        local dataToSave = {
-            false,
-            false,
-            false,
-            false,
-            0,
-            0,
-            0
-        }
-        for i,v in pairs(dataToSave) do
-            if type(v) == "boolean" then
-                if v == true then
-                    dataToSave[i] = "true"
-                else
-                    dataToSave[i] = "false"
-                end
-            end
-        end
-        love.filesystem.write("data.dat", table.concat(dataToSave,"\n"))
+        newSave()
     end
-
 
     local datas = {}
     for lines in love.filesystem.lines("data.dat") do
         table.insert(datas,lines)
+    end
+    if #datas < numOfOptions then
+        newSave()
+        datas = {}
+        for lines in love.filesystem.lines("data.dat") do
+            table.insert(datas,lines)
+        end
     end
     for i,v in pairs(datas) do
         if v == "true" then
@@ -131,10 +147,12 @@ function love.load()
         Gravity = datas[2]
         UltraSaiyan = datas[3]
         Fullscreen = datas[4]
+        FPSCounter = datas[5]
+        VSync = datas[6]
         local blahblah = {}
-        table.insert(blahblah, tonumber(datas[5]))
-        table.insert(blahblah, tonumber(datas[6]))
         table.insert(blahblah, tonumber(datas[7]))
+        table.insert(blahblah, tonumber(datas[8]))
+        table.insert(blahblah, tonumber(datas[9]))
         mainmenu:LOADDATA(blahblah)
     end
 
@@ -289,6 +307,12 @@ local function loadLevel(dir)
 end
 
 function love.update(dt)
+    DELTATIME = dt
+    if VSync then
+        love.window.setVSync(-1)
+    else
+        love.window.setVSync(0)
+    end
     if Fullscreen then
         love.window.setFullscreen(true, "desktop")
     else
@@ -352,25 +376,26 @@ function love.update(dt)
     if not player then
         return
     end
-    if player.x >= love.graphics:getWidth()-16 then
+    local FPSCompensation = (1+love.timer.getFPS()*dt)
+    if player.x >= love.graphics:getWidth()-(player.image:getWidth()/2*ScaleX) then
         love.graphics.clear()
         level = level + 1
-        player.x = -15
+        player.x = (-player.image:getWidth()/2*ScaleX+1*FPSCompensation)
         love.draw()
-    elseif player.x <= -16 then
+    elseif player.x <= (-player.image:getWidth()/2*ScaleX) then
         love.graphics.clear()
         level = level - 1
-        player.x = love.graphics:getWidth()-17
+        player.x = love.graphics:getWidth()-(player.image:getWidth()/2*ScaleX+(1*FPSCompensation))
         love.draw()
-    elseif player.y <= -16 then
+    elseif player.y <= (-player.image:getHeight()/2*ScaleY) then
         love.graphics:clear()
         level = level + 1
-        player.y = love.graphics:getHeight()-17
+        player.y = love.graphics:getHeight()-(player.image:getHeight()/2*ScaleY+(1*FPSCompensation))
         love.draw()
-    elseif player.y >= love.graphics:getHeight()-16 then
+    elseif player.y >= love.graphics:getHeight()-(player.image:getHeight()/2*ScaleY) then
         love.graphics:clear()
         level = level - 1
-        player.y = -15
+        player.y = (-player.image:getHeight()/2*ScaleY+1*FPSCompensation)
         love.draw()
     end
     for i,v in ipairs(objects) do
@@ -392,71 +417,54 @@ function love.update(dt)
     end
     -------------
 
-    local loop = true
-    local limit = 0
-
-    while loop do
-        loop = false
-
-        limit = limit + 1
-        if limit > 100 then
-            break
+    for i=1,#objects-1 do
+        for j=i+1,#objects do
+            local collision = objects[i]:resolveCollision(objects[j])
         end
-
-        for i=1,#objects-1 do
-            for j=i+1,#objects do
-                local collision = objects[i]:resolveCollision(objects[j])
-                if collision then
-                    loop = true
-                end
-            end
-        end
-
-        -- For each object check collision with every wall.
-        ---- ADD THIS
-        for i,v in ipairs(walls) do
-            for i2, wall in ipairs(v) do
-                if wall.canTouch == true then
-                    for j,object in ipairs(objects) do
-                        local collision = object:resolveCollision(wall)
-                        if collision then
-                            if wall.winWall then
-                                winscreen.x = math.random(800*ScaleX-80)
-                                winscreen.y = math.random(600*ScaleY-180)
-                                WONTHEGAME = true
-                            end
-                            loop = true
-                        end
-                    end
-                    for j,enmie in ipairs(enemies) do 
-                        for j2, enmy in ipairs(enmie) do
-                            local collision = enmy:resolveCollision(wall)
-                            if collision then
-                                enmy.moveX = -enmy.moveX
-                                enmy.moveY = -enmy.moveY
-                                loop = true
-                            end
-                        end
-                    end
-                end
-            end
-        end
-
-        for i, v in ipairs(enemies) do
-            for i2, enmy in ipairs(v) do
-                if enmy.canMove == true then
-                    for j,object in ipairs(objects) do
-                        local collision = object:resolveCollision(enmy)
-                        if collision and not AlexMode then
-                            LOSTTHEGAME = true
-                            loop = true
-                        end
-                    end
-                end
-            end
-        end
-        -------------
     end
+
+    -- For each object check collision with every wall.
+    ---- ADD THIS
+    for i,v in ipairs(walls) do
+        for i2, wall in ipairs(v) do
+            if wall.canTouch == true then
+                for j,object in ipairs(objects) do
+                    local collision = object:resolveCollision(wall)
+                    if collision then
+                        if wall.winWall then
+                            winscreen.x = math.random(800*ScaleX-80)
+                            winscreen.y = math.random(600*ScaleY-180)
+                            WONTHEGAME = true
+                        end
+                    end
+                end
+                for j,enmie in ipairs(enemies) do 
+                    for j2, enmy in ipairs(enmie) do
+                        local collision = enmy:resolveCollision(wall)
+                        if collision then
+                            enmy.moveX = -enmy.moveX
+                            enmy.moveY = -enmy.moveY
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    for i, v in ipairs(enemies) do
+        for i2, enmy in ipairs(v) do
+            if enmy.canMove == true then
+                for j,object in ipairs(objects) do
+                    local collision = object:resolveCollision(enmy)
+                    if collision and not AlexMode then
+                        LOSTTHEGAME = true
+                    end
+                end
+            end
+        end
+    end
+        -------------
+    --end
 end
 
 function love.draw()
@@ -508,6 +516,9 @@ function love.draw()
         if v then
             v:draw()
         end
+    end
+    if FPSCounter then
+        love.graphics.print(love.timer.getFPS(),0,0)
     end
 end
 
