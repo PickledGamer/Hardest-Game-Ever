@@ -76,7 +76,7 @@ local yPosScale = 50*ScaleY
 local entXOffset = 9*ScaleX
 local entYOffset = 9*ScaleY
 
-function newSave()
+local function newSave()
     local dataToSave = {
         false,
         false,
@@ -91,9 +91,11 @@ function newSave()
     for i,v in pairs(dataToSave) do
         if type(v) == "boolean" then
             if v == true then
-                dataToSave[i] = "true"
+                table.remove(dataToSave, i)
+                table.insert(dataToSave,i,"true")
             else
-                dataToSave[i] = "false"
+                table.remove(dataToSave, i)
+                table.insert(dataToSave,i,"false")
             end
         end
     end
@@ -158,7 +160,7 @@ function love.load()
 
 end
 
-function random_reset()
+function Random_reset()
     math.randomseed (os.time())
     local rnd = math.random(10)
     for i = 1,rnd do
@@ -167,7 +169,7 @@ function random_reset()
 end
 
 function RandomSong()
-    random_reset()
+    Random_reset()
     local bruh = GetFileNames("assets/goofMusic/")
     local rng = math.random(#bruh)
     if rng == lastsong and #bruh > 1 then
@@ -181,7 +183,7 @@ function RandomSong()
 end
 
 function RandomWinSong()
-    random_reset()
+    Random_reset()
     local bruh = GetFileNames("assets/goofWinMusic/")
     local rng = math.random(#bruh)
     if rng == lastwinsong and #bruh > 1 then
@@ -261,7 +263,7 @@ local function CheckObjectType(m)
 end
 
 local function loadLevel(dir)
-    random_reset()
+    Random_reset()
     winSong = nil
     song = nil
     objects = {}
@@ -290,7 +292,7 @@ local function loadLevel(dir)
         mainmenu:AddErrorText(levelToLoad.." Has No WinWall!", 2)
         noWinWall = true
     end
-    random_reset()
+    Random_reset()
     winSong = RandomWinSong()
     winSong:setVolume(MusicVolume/100)
     song = RandomSong()
@@ -341,7 +343,9 @@ function love.update(dt)
     end
 
     if WONTHEGAME then
-        song:stop()
+        if song then
+            song:stop()
+        end
         if winSong and not winSong:isPlaying() then
             winSong:play()
         end
@@ -349,7 +353,9 @@ function love.update(dt)
         return
     end
     if LOSTTHEGAME then
-        song:stop()
+        if song then
+            song:stop()
+        end
         losescreen:update(dt)
         return
     end
@@ -535,7 +541,7 @@ function love.keypressed(key)
             if winSong then
                 winSong:stop()
             end
-            random_reset()
+            Random_reset()
         end
         return
     end
@@ -545,7 +551,7 @@ function love.keypressed(key)
         if dingleberry == "Sigma" then
             LOSTTHEGAME = false
             currentState = GameStates[1]
-            random_reset()
+            Random_reset()
         end
         return
     end
@@ -558,7 +564,7 @@ function love.keypressed(key)
             if winSong then
                 winSong:stop()
             end
-            random_reset()
+            Random_reset()
         end
         return
     end

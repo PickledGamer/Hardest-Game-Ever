@@ -6,9 +6,9 @@ local lastVid
 local wasVid = false
 local vidChance = 0
 local DeltaTime = 0
+local font = love.graphics.newFont("assets/Mojangles.ttf", 20)
 
 function LoseScreen:new()
-    font = love.graphics.newFont("assets/Mojangles.ttf", 20)
     self.UltraSaiyan = love.graphics.newImage("assets/ultrasaiyan3.png")
     self.textChangeTimer = 0
     self.InCustomLevels = false
@@ -44,7 +44,7 @@ function GetFileNames(dir)
 end
 
 function LoseScreen:RandomSFX()
-    random_reset()
+    Random_reset()
     local bruh = GetFileNames("assets/goofSFX/")
     local rng = math.random(#bruh)
     local rng2 = math.random(#bruh)

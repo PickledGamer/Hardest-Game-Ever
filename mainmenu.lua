@@ -4,11 +4,11 @@ local indexNum = 1
 local MasterVolumeSubNum = 0
 local SFXVolumeSubNum = 0
 local MusicVolumeSubNum = 0
+local menu = love.graphics.newImage("assets/MenuBox.png")
+local font = love.graphics.newFont("assets/Mojangles.ttf", 20*ScaleX)
+local font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleX)
 
 function MainMenu:new()
-    menu = love.graphics.newImage("assets/MenuBox.png")
-    font = love.graphics.newFont("assets/Mojangles.ttf", 20*ScaleX)
-    font2 = love.graphics.newFont("assets/Mojangles.ttf", 35*ScaleX)
     self.textChangeTimer = 0
     self.InCustomLevels = false
     self.InOptionsMenu = false
@@ -53,6 +53,10 @@ function MainMenu:new()
         false,
         false,
         false,
+        false,
+        true,
+        100,
+        100,
         100
     }
     self.Title = "BrainRot"
@@ -242,9 +246,11 @@ local function SaveData()
     for i,v in pairs(dataToSave) do
         if type(v) == "boolean" then
             if v == true then
-                dataToSave[i] = "true"
+                table.remove(dataToSave, i)
+                table.insert(dataToSave,i,"true")
             else
-                dataToSave[i] = "false"
+                table.remove(dataToSave, i)
+                table.insert(dataToSave,i,"false")
             end
         end
     end
