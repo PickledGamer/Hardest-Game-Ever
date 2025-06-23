@@ -36,7 +36,7 @@ function MainMenu:new()
         "all the folders in /assets/ can be added to",
         "here: "..str.."/assets/"
     }
-    self.OptionsShit = {
+    self.OptionsShtuff = {
         "AlexMode",
         "Gravity",
         "UltraSaiyan",
@@ -143,16 +143,16 @@ function MainMenu:draw()
     love.graphics.setFont(font)
     if self.InOptionsMenu then
         --if Fullscreen then
-            love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY+(font:getHeight()*#self.OptionsShit/10)/100)
+            love.graphics.draw(menu, love.graphics.getWidth()/2 - (menu:getWidth()/2)*ScaleX, love.graphics.getHeight()/2 - (menu:getHeight()/2)*ScaleY,0,ScaleX,ScaleY+(font:getHeight()*#self.OptionsShtuff/10)/100)
         --else
         
         --end
         local offset = -font:getHeight()*2
-        for i, v in pairs(self.OptionsShit) do
+        for i, v in pairs(self.OptionsShtuff) do
             if indexNum == i then
                 love.graphics.setColor(0.7,0.6,0.2,1)
             end
-            if i == #self.OptionsShit then
+            if i == #self.OptionsShtuff then
                 love.graphics.print(v, love.graphics.getWidth()/2 - font:getWidth(v)/1.5, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
             else
                 love.graphics.print(v..": "..tostring(self.OptionDisplayValues[i]), love.graphics.getWidth()/2 - font:getWidth(v)/1.5, (love.graphics.getHeight()/2 - font:getHeight()) + offset)
@@ -305,7 +305,7 @@ function MainMenu:keypressed(key)
                 FPSCounter = not FPSCounter
             elseif indexNum == 6 then
                 VSync = not VSync
-            elseif indexNum == #self.OptionsShit then
+            elseif indexNum == #self.OptionsShtuff then
                 SaveData()
             end
         else
@@ -321,8 +321,8 @@ function MainMenu:keypressed(key)
         end
     elseif self.InOptionsMenu then
         if indexNum < 1 then
-            indexNum = #self.OptionsShit
-        elseif indexNum > #self.OptionsShit then
+            indexNum = #self.OptionsShtuff
+        elseif indexNum > #self.OptionsShtuff then
             indexNum = 1
         end
     else

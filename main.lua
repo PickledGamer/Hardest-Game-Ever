@@ -21,7 +21,7 @@ UltraSaiyan = false -- pop-up for fart sfx
 Fullscreen = false -- this is obvious
 FPSCounter = false
 VSync = true
-MasterVolume = 100 -- VOLUME FOR SHIT
+MasterVolume = 100 -- VOLUME FOR SHTUFF
 SFXVolume = 100 -- guess
 MusicVolume = 100 -- who could havent guessing
 
