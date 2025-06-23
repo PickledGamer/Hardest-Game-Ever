@@ -15,6 +15,8 @@ end
 function Lobotomy:new()
     self.White = love.graphics.newImage("assets/White.png")
     self.Image = RandomPIC()
+    self.Sound2 = love.audio.newSource("assets/Going.mp3", "stream")
+    self.Sound2:setVolume(1)
     self.Sound = love.audio.newSource("assets/lobotomy.mp3", "stream")
     self.WhiteFade = 1
     self.Fade = 1
@@ -40,7 +42,13 @@ function Lobotomy:draw()
     love.graphics.draw(self.White,0,0,0,love.graphics.getWidth()/self.White:getWidth(),love.graphics.getHeight()/self.White:getHeight())
     if not self.Played then
         self.Played = true
-        self.Sound:play()
+        local chance = math.random(2)
+        if chance == 1 then
+            self.Sound:play()
+        else
+            self.Sound2:play()
+        end
+
     end
     love.graphics.setColor(1,1,1,1)
 end
