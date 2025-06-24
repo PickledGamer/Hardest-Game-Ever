@@ -5,19 +5,24 @@ function GetFileNames(dir)
     return tab
 end
 
-function RandomPIC()
+local function RandomPIC()
     local bruh = GetFileNames("assets/LobotomyImages/")
     local rng = math.random(1, #bruh)
     local file = bruh[rng]
     return love.graphics.newImage("assets/LobotomyImages/"..file)
 end
 
+local function RandomSFX()
+    local bruh = GetFileNames("assets/LobotomySounds/")
+    local rng = math.random(#bruh)
+    local file = bruh[rng]
+    return file
+end
+
 function Lobotomy:new()
     self.White = love.graphics.newImage("assets/White.png")
     self.Image = RandomPIC()
-    self.Sound2 = love.audio.newSource("assets/Going.mp3", "stream")
-    self.Sound2:setVolume(1)
-    self.Sound = love.audio.newSource("assets/lobotomy.mp3", "stream")
+    self.Sound = love.audio.newSource("assets/LobotomySounds/"..RandomSFX(), "stream")
     self.WhiteFade = 1
     self.Fade = 1
     self.LastLobotomySound = 0
@@ -42,18 +47,7 @@ function Lobotomy:draw()
     love.graphics.draw(self.White,0,0,0,love.graphics.getWidth()/self.White:getWidth(),love.graphics.getHeight()/self.White:getHeight())
     if not self.Played then
         self.Played = true
-        local chance = math.random(2)
-        if chance == self.LastLobotomySound then
-            repeat
-                chance = math.random(2)
-            until chance ~= self.LastLobotomySound
-        end
-        if chance == 1 then
-            self.Sound:play()
-        else
-            self.Sound2:play()
-        end
-        self.LastLobotomySound = chance
+        self.Sound:play()
     end
     love.graphics.setColor(1,1,1,1)
 end

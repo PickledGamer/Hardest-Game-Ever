@@ -102,6 +102,13 @@ local function newSave()
     love.filesystem.write("data.dat", table.concat(dataToSave,"\n"))
 end
 
+local function playLevelChange()
+    local bruh = GetFileNames("assets/LevelChangeSFX/")
+    local rng = math.random(#bruh)
+    local file = bruh[rng]
+    love.audio.newSource("assets/LevelChangeSFX/"..file, "stream"):play()
+end
+
 function love.load()
     Object = require "classic"
     require "entity"
@@ -384,21 +391,25 @@ function love.update(dt)
     end
     local FPSCompensation = (1+love.timer.getFPS()*dt)
     if player.x >= love.graphics:getWidth()-(player.image:getWidth()/2*ScaleX) then
+        playLevelChange()
         love.graphics.clear()
         level = level + 1
         player.x = (-player.image:getWidth()/2*ScaleX+1*FPSCompensation)
         love.draw()
     elseif player.x <= (-player.image:getWidth()/2*ScaleX) then
+        playLevelChange()
         love.graphics.clear()
         level = level - 1
         player.x = love.graphics:getWidth()-(player.image:getWidth()/2*ScaleX+(1*FPSCompensation))
         love.draw()
     elseif player.y <= (-player.image:getHeight()/2*ScaleY) then
+        playLevelChange()
         love.graphics:clear()
         level = level + 1
         player.y = love.graphics:getHeight()-(player.image:getHeight()/2*ScaleY+(1*FPSCompensation))
         love.draw()
     elseif player.y >= love.graphics:getHeight()-(player.image:getHeight()/2*ScaleY) then
+        playLevelChange()
         love.graphics:clear()
         level = level - 1
         player.y = (-player.image:getHeight()/2*ScaleY+1*FPSCompensation)
