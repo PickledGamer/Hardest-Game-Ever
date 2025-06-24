@@ -270,6 +270,9 @@ local function CheckObjectType(m)
 end
 
 local function loadLevel(dir)
+    if song and song:isPlaying() then
+        song:stop()
+    end
     Random_reset()
     winSong = nil
     song = nil
@@ -383,8 +386,10 @@ function love.update(dt)
         end
         LASTLEVEL = #levels
     end
-    if song and not song:isPlaying() then
+    if song and not song:isPlaying() and not LOSTTHEGAME and not WONTHEGAME then
         song:play()
+    elseif song and song:isPlaying() and (LOSTTHEGAME or WONTHEGAME) then
+        song:stop()
     end
     if not player then
         return
