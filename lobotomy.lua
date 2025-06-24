@@ -20,17 +20,17 @@ function Lobotomy:new()
     self.Sound = love.audio.newSource("assets/lobotomy.mp3", "stream")
     self.WhiteFade = 1
     self.Fade = 1
+    self.LastLobotomySound = 0
     self.Played = false
 end
 
 function Lobotomy:update(dt)
     self.Sound:setVolume(SFXVolume/100)
     if self.WhiteFade > 0.5 then
-        self.WhiteFade = self.WhiteFade - dt/4
-        self.Fade = self.Fade - dt/8
-    else
         self.WhiteFade = self.WhiteFade - dt/2
-        self.Fade = self.Fade - dt/4
+    else
+        self.WhiteFade = self.WhiteFade - dt
+        self.Fade = self.Fade - dt/2
     end
 end
 
@@ -43,12 +43,17 @@ function Lobotomy:draw()
     if not self.Played then
         self.Played = true
         local chance = math.random(2)
+        if chance == self.LastLobotomySound then
+            repeat
+                chance = math.random(2)
+            until chance ~= self.LastLobotomySound
+        end
         if chance == 1 then
             self.Sound:play()
         else
             self.Sound2:play()
         end
-
+        self.LastLobotomySound = chance
     end
     love.graphics.setColor(1,1,1,1)
 end
