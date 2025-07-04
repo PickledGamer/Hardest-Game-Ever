@@ -10,4 +10,4 @@ https://marketplace.visualstudio.com/items?itemName=pixelbyte-studios.pixelbyte-
 \
 https://marketplace.visualstudio.com/items?itemName=sumneko.lua
 
-get this shit and you good to go :)
+get this shtuff and you good to go :)
